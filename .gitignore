@@ -1,0 +1,7 @@
+/target
+/*/target
+*.iml
+*.log
+*.done.files
+.project
+.settings
