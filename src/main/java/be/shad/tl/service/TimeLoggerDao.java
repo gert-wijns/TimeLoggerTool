@@ -8,6 +8,12 @@ import be.shad.tl.service.model.TimeLoggerTask;
 
 public interface TimeLoggerDao {
 
+    TimeLoggerTask getTask(String id);
+
+    TimeLoggerTag getTaskTag(String code);
+
+    TimeLoggerEntry getTaskEntry(String id);
+
     Collection<TimeLoggerTask> getTasks();
 
     Collection<TimeLoggerTag> getTaskTags(String taskId);

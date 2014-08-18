@@ -8,44 +8,54 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.beans.Observable;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
+import be.shad.tl.service.TimeLogger;
 import be.shad.tl.service.TimeLoggerDao;
 import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
+import be.shad.tl.ui.control.TaskListCell;
+import be.shad.tl.ui.model.ActiveTaskData;
 import be.shad.tl.ui.model.TimeLoggerViewEntry;
 import be.shad.tl.ui.model.TimeLoggerViewTag;
 import be.shad.tl.ui.model.TimeLoggerViewTask;
 
 public class TimeLoggerFormController {
-    @FXML private TableView<TimeLoggerViewTask> taskTable;
-    @FXML private TableColumn<TimeLoggerViewTask, Boolean> activeColumn;
-    @FXML private TableColumn<TimeLoggerViewTask, String> nameColumn;
-
+    @FXML private ListView<TimeLoggerViewTask> taskList;
     @FXML private TableView<TimeLoggerViewEntry> entriesTable;
     @FXML private TableColumn<TimeLoggerViewEntry, Date> startDateColumn;
     @FXML private TableColumn<TimeLoggerViewEntry, Date> endDateColumn;
     @FXML private HBox tagsBox;
 
     @FXML private Label taskNameCaptionLabel;
+    @FXML private TextField taskCreationField;
     @FXML private TextField taskDescriptionField;
 
-    private ObservableList<TimeLoggerViewTask> tasks = observableArrayList();
+    private ObservableList<TimeLoggerViewTask> tasks;
     private ObservableList<TimeLoggerViewTag> tags = observableArrayList();
     private ObservableList<TimeLoggerViewEntry> entries = observableArrayList();
+    private ActiveTaskData activeTaskData = null;
 
     private TimeLoggerDao timeLoggerDao;
+    private TimeLogger timeLogger;
 
-    public void setTimeLoggerDao(TimeLoggerDao timeLoggerDao) {
+    public void setTimeLoggerDao(TimeLoggerDao timeLoggerDao, TimeLogger timeLogger) {
         this.timeLoggerDao = timeLoggerDao;
+        this.timeLogger = timeLogger;
 
         refreshTasks();
     }
@@ -56,55 +66,110 @@ public class TimeLoggerFormController {
      */
     @FXML
     private void initialize() {
+        tasks = observableArrayList(task -> new Observable[] {
+                task.activeProperty(), task.durationProperty()});
+
         // Initialize the person table with the two columns.
-        nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        activeColumn.setCellValueFactory(cellData -> cellData.getValue().activeProperty());
         startDateColumn.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
         endDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
 
-        taskTable.getSelectionModel().selectedItemProperty().addListener(
+        taskList.setCellFactory(value -> new TaskListCell());
+        taskList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showTaskDetails(newValue));
-        taskTable.setItems(tasks);
+        taskList.setItems(tasks);
 
         entriesTable.setItems(entries);
+
+        final Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            if (activeTaskData != null) {
+                activeTaskData.getTask().durationProperty().set(activeTaskData.getDuration());
+            }
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
     }
 
     private void refreshTasks() {
         Collection<TimeLoggerTask> tasks = timeLoggerDao.getTasks();
-        this.tasks.setAll(tasks.stream().
-                map(t -> new TimeLoggerViewTask(t)).
-                collect(Collectors.toList()));
+        Collection<TimeLoggerViewTask> viewTasks = new LinkedList<>();
+        for(TimeLoggerTask task: tasks) {
+            TimeLoggerViewTask viewTask = new TimeLoggerViewTask(task);
+            long duration = 0;
+            Collection<TimeLoggerEntry> entries = timeLoggerDao.getTaskEntries(task.getId());
+            for (TimeLoggerEntry entry: entries) {
+                if (entry.getEndDate() != null) {
+                    duration += entry.getEndDate().getTime() - entry.getStartDate().getTime();
+                } else {
+                    viewTask.setActive(true);
+                }
+            }
+            viewTask.setDuration(duration);
+            if (viewTask.isActive()) {
+                activeTaskData = new ActiveTaskData(viewTask);
+            }
+            viewTasks.add(viewTask);
+        }
+        this.tasks.setAll(viewTasks);
     }
 
     private void showTaskDetails(TimeLoggerViewTask task) {
-        taskDescriptionField.setText(task.getDescription());
-        taskNameCaptionLabel.setText(task.getName());
+        if (task == null) {
+            taskDescriptionField.setText("Task");
+            taskDescriptionField.setText("Description");
+            tagsBox.getChildren().clear();
+        } else {
+            taskDescriptionField.setText(task.getDescription());
+            taskNameCaptionLabel.setText(task.getName());
 
-        Collection<TimeLoggerTag> tags = timeLoggerDao.getTaskTags(task.getId());
-        this.tags.setAll(tags.stream().
-            map(t -> new TimeLoggerViewTag(t.getCode(), t.getDescription())).
-            collect(Collectors.toList()));
+            Collection<TimeLoggerTag> tags = timeLoggerDao.getTaskTags(task.getId());
+            this.tags.setAll(tags.stream().
+                map(t -> new TimeLoggerViewTag(t.getCode(), t.getDescription())).
+                collect(Collectors.toList()));
 
-        List<Node> tagNodes = new LinkedList<>();
-        for(TimeLoggerTag tag: tags) {
-            Label tagLabel = new Label();
-            tagLabel.setText(tag.getCode());
-            tagNodes.add(tagLabel);
+            List<Node> tagNodes = new LinkedList<>();
+            for(TimeLoggerTag tag: tags) {
+                Label tagLabel = new Label();
+                tagLabel.setText(tag.getCode());
+                tagNodes.add(tagLabel);
+            }
+            tagsBox.getChildren().setAll(tagNodes);
+
+            Collection<TimeLoggerEntry> entries = timeLoggerDao.getTaskEntries(task.getId());
+            this.entries.setAll(entries.stream().
+                map(e -> new TimeLoggerViewEntry(e.getId(), e.getStartDate(), e.getEndDate())).
+                collect(Collectors.toList()));
         }
-        tagsBox.getChildren().setAll(tagNodes);
-
-        Collection<TimeLoggerEntry> entries = timeLoggerDao.getTaskEntries(task.getId());
-        this.entries.setAll(entries.stream().
-            map(e -> new TimeLoggerViewEntry(e.getId(), e.getStartDate(), e.getEndDate())).
-            collect(Collectors.toList()));
     }
 
     @FXML
-    private void handleOnTaskTableClick(MouseEvent event) {
+    private void handleOnTaskListClick(MouseEvent event) {
         if (event.getClickCount() == 2) {
-            TimeLoggerViewTask selectedTask = taskTable.getSelectionModel().getSelectedItem();
-            selectedTask.setActive(!selectedTask.isActive());
-            System.out.println(selectedTask);
+            TimeLoggerViewTask selectedTask = taskList.getSelectionModel().getSelectedItem();
+            if (activeTaskData != null) {
+                activeTaskData.getTask().setActive(false);
+                timeLogger.stopTask(activeTaskData.getTask().getId());
+                if (activeTaskData.getTask().getId().equals(selectedTask.getId())) {
+                    activeTaskData = null;
+                    showTaskDetails(selectedTask);
+                    return;
+                }
+            }
+            activeTaskData = new ActiveTaskData(selectedTask);
+            selectedTask.setActive(true);
+            timeLogger.startTask(selectedTask.getId());
+            showTaskDetails(selectedTask);
+        }
+    }
+
+    @FXML
+    private void handleOnTaskCreationFieldAction() {
+        String taskId = timeLogger.createTask(taskCreationField.getText());
+        taskCreationField.clear();
+        refreshTasks();
+        for(TimeLoggerViewTask task: tasks) {
+            if (task.getId().equals(taskId)) {
+                taskList.getSelectionModel().select(task);
+            }
         }
     }
 }

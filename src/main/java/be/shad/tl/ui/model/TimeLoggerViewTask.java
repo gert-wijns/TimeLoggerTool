@@ -1,7 +1,9 @@
 package be.shad.tl.ui.model;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import be.shad.tl.service.model.TimeLoggerTask;
@@ -11,17 +13,19 @@ public class TimeLoggerViewTask {
     private StringProperty id;
     private StringProperty name;
     private StringProperty description;
+    private LongProperty duration;
     private BooleanProperty active;
 
     public TimeLoggerViewTask(TimeLoggerTask task) {
-        this(task.getId(), task.getName(), task.getDescription(), false);
+        this(task.getId(), task.getName(), task.getDescription(), 0L, false);
     }
 
-    public TimeLoggerViewTask(String id, String name, String description, Boolean active) {
+    public TimeLoggerViewTask(String id, String name, String description, Long duration, Boolean active) {
         this.id = new SimpleStringProperty(id);
         this.name = new SimpleStringProperty(name);
         this.description = new SimpleStringProperty(description);
         this.active = new SimpleBooleanProperty(active);
+        this.duration = new SimpleLongProperty(duration);
     }
 
     public final StringProperty idProperty() {
@@ -70,5 +74,17 @@ public class TimeLoggerViewTask {
 
     public final void setActive(final boolean active) {
         this.activeProperty().set(active);
+    }
+
+    public final LongProperty durationProperty() {
+        return this.duration;
+    }
+
+    public final long getDuration() {
+        return this.durationProperty().get();
+    }
+
+    public final void setDuration(final long duration) {
+        this.durationProperty().set(duration);
     }
 }

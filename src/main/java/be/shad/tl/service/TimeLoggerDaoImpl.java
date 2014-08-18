@@ -18,6 +18,36 @@ public class TimeLoggerDaoImpl implements TimeLoggerDao {
     private PMap<String, PCollection<TimeLoggerEntry>> taskEntries = HashTreePMap.empty();
 
     @Override
+    public TimeLoggerTask getTask(String id) {
+        for(TimeLoggerTask task: tasks) {
+            if (task.getId().equals(id)) {
+                return task;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public TimeLoggerEntry getTaskEntry(String id) {
+        for(TimeLoggerEntry entry: entries) {
+            if (entry.getId().equals(id)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public TimeLoggerTag getTaskTag(String code) {
+        for(TimeLoggerTag tag: tags) {
+            if (tag.getCode().equals(code)) {
+                return tag;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public PCollection<TimeLoggerTask> getTasks() {
         return tasks;
     }

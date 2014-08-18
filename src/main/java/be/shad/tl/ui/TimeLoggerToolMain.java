@@ -2,7 +2,7 @@ package be.shad.tl.ui;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,25 +10,27 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import be.shad.tl.service.TimeLogger;
 import be.shad.tl.service.TimeLoggerDao;
 import be.shad.tl.service.TimeLoggerDaoImpl;
-import be.shad.tl.service.model.TimeLoggerEntry;
-import be.shad.tl.service.model.TimeLoggerTag;
-import be.shad.tl.service.model.TimeLoggerTask;
+import be.shad.tl.service.TimeLoggerImpl;
+import be.shad.tl.ui.view.RootLayoutController;
 import be.shad.tl.ui.view.TimeLoggerFormController;
 
 public class TimeLoggerToolMain extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
     private TimeLoggerDao timeLoggerDao;
+    private TimeLogger timeLogger;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.timeLoggerDao = new TimeLoggerDaoImpl();
+        this.timeLogger = new TimeLoggerImpl(timeLoggerDao);
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("TimeLoggerTool");
 
-        insertMockData();
+        //insertMockData();
         // Set the application icon.
         //this.primaryStage.getIcons().add(new Image("file:resources/images/address_book_32.png"));
 
@@ -37,23 +39,18 @@ public class TimeLoggerToolMain extends Application {
     }
 
     private void insertMockData() {
-        TimeLoggerTask task = new TimeLoggerTask();
-        task.setId(UUID.randomUUID().toString());
-        task.setName("Task1");
-        task.setDescription("Task description");
-        timeLoggerDao.saveTask(task);
-
-        TimeLoggerEntry entry = new TimeLoggerEntry();
-        entry.setId(UUID.randomUUID().toString());
-        entry.setStartDate(new Date());
-        timeLoggerDao.saveEntry(entry);
-
-        TimeLoggerTag tag = new TimeLoggerTag();
-        tag.setCode("Jira");
-        timeLoggerDao.saveTag(tag);
-
-        timeLoggerDao.addEntry(task, entry);
-        timeLoggerDao.addTag(task, tag);
+        String task1 = timeLogger.createTask("Task1");
+        timeLogger.setTaskDescription(task1, "A magnificent description");
+        timeLogger.startTask(task1, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(4)));
+        timeLogger.stopTask(task1, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(3)));
+        timeLogger.startTask(task1, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2)));
+        timeLogger.stopTask(task1, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)));
+        timeLogger.tagTask(task1, "Jira");
+        String task2 = timeLogger.createTask("Task2");
+        timeLogger.startTask(task2, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(3)));
+        timeLogger.stopTask(task2, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2)));
+        timeLogger.startTask(task2, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1)));
+        timeLogger.stopTask(task2, new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(0)));
     }
 
     private void showTasksForm() {
@@ -68,7 +65,7 @@ public class TimeLoggerToolMain extends Application {
 
             // Give the controller access to the main app.
             TimeLoggerFormController controller = loader.getController();
-            controller.setTimeLoggerDao(timeLoggerDao);
+            controller.setTimeLoggerDao(timeLoggerDao, timeLogger);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -91,7 +88,8 @@ public class TimeLoggerToolMain extends Application {
             primaryStage.setScene(scene);
 
             // Give the controller access to the main app.
-            //RootLayoutController controller = loader.getController();
+            RootLayoutController controller = loader.getController();
+            controller.setTimeLoggerDao(timeLoggerDao);
 
             primaryStage.show();
         } catch (IOException e) {
