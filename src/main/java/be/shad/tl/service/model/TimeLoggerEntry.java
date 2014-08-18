@@ -7,6 +7,7 @@ public class TimeLoggerEntry {
     private String id;
     private Date startDate;
     private Date endDate;
+    private String remark;
 
     public String getId() {
         return id;
@@ -30,5 +31,13 @@ public class TimeLoggerEntry {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

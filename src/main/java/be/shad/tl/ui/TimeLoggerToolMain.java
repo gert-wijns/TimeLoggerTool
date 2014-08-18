@@ -1,5 +1,6 @@
 package be.shad.tl.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +31,7 @@ public class TimeLoggerToolMain extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("TimeLoggerTool");
 
-        //insertMockData();
+        insertMockData();
         // Set the application icon.
         //this.primaryStage.getIcons().add(new Image("file:resources/images/address_book_32.png"));
 
@@ -86,6 +87,12 @@ public class TimeLoggerToolMain extends Application {
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
+
+            File f = new File("time-logger-tool.css");
+            if (f.exists()) {
+                scene.getStylesheets().clear();
+                scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+            }
 
             // Give the controller access to the main app.
             RootLayoutController controller = loader.getController();

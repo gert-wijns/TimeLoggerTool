@@ -6,16 +6,23 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import be.shad.tl.service.model.TimeLoggerEntry;
 
 public class TimeLoggerViewEntry {
     private StringProperty id;
     private ObjectProperty<Date> startDate;
     private ObjectProperty<Date> endDate;
+    private StringProperty remark;
 
-    public TimeLoggerViewEntry(String id, Date startDate, Date endDate) {
+    public TimeLoggerViewEntry(TimeLoggerEntry entry) {
+        this(entry.getId(), entry.getStartDate(), entry.getEndDate(), entry.getRemark());
+    }
+
+    public TimeLoggerViewEntry(String id, Date startDate, Date endDate, String remark) {
         this.id = new SimpleStringProperty(id);
         this.startDate = new SimpleObjectProperty<Date>(startDate);
         this.endDate = new SimpleObjectProperty<Date>(endDate);
+        this.remark = new SimpleStringProperty(remark);
     }
 
     public final StringProperty idProperty() {
@@ -52,5 +59,17 @@ public class TimeLoggerViewEntry {
 
     public final void setEndDate(final java.util.Date endDate) {
         this.endDateProperty().set(endDate);
+    }
+
+    public final StringProperty remarkProperty() {
+        return this.remark;
+    }
+
+    public final java.lang.String getRemark() {
+        return this.remarkProperty().get();
+    }
+
+    public final void setRemark(final java.lang.String remark) {
+        this.remarkProperty().set(remark);
     }
 }

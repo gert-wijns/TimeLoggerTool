@@ -29,5 +29,4 @@ public interface TimeLoggerDao {
     TimeLoggerTag saveTag(TimeLoggerTag tag);
 
     TimeLoggerEntry saveEntry(TimeLoggerEntry entry);
-
 }

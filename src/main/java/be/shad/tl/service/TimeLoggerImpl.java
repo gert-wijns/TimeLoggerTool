@@ -33,7 +33,13 @@ public class TimeLoggerImpl implements TimeLogger {
 
     @Override
     public void startTask(String taskId, Date startDate) {
+        startTask(taskId, UUID.randomUUID().toString(), startDate);
+    }
+
+    @Override
+    public void startTask(String taskId, String entryId, Date startDate) {
         TimeLoggerEntry entry = new TimeLoggerEntry();
+        entry.setId(entryId);
         entry.setStartDate(startDate);
         dao.saveEntry(entry);
         dao.addEntry(dao.getTask(taskId), entry);
@@ -49,7 +55,7 @@ public class TimeLoggerImpl implements TimeLogger {
         Collection<TimeLoggerEntry> taskEntries = dao.getTaskEntries(taskId);
         for(TimeLoggerEntry entry: taskEntries) {
             if (entry.getEndDate() == null) {
-                entry.setEndDate(endDate);
+                stopTaskEntry(entry.getId(), endDate);
                 return;
             }
         }
@@ -58,12 +64,22 @@ public class TimeLoggerImpl implements TimeLogger {
     }
 
     @Override
+    public void stopTaskEntry(String entryId, Date endDate) {
+        dao.getTaskEntry(entryId).setEndDate(endDate);
+    }
+
+    @Override
     public String createTask(String name) {
+        return createTask(UUID.randomUUID().toString(), name);
+    }
+
+    @Override
+    public String createTask(String taskId, String name) {
         TimeLoggerTask task = new TimeLoggerTask();
-        task.setId(UUID.randomUUID().toString());
+        task.setId(taskId);
         task.setName(name);
         dao.saveTask(task);
-        return task.getId();
+        return taskId;
     }
 
     @Override
@@ -80,6 +96,17 @@ public class TimeLoggerImpl implements TimeLogger {
 
     @Override
     public void setTagDescription(String code, String description) {
-        dao.getTask(code).setDescription(description);
+        dao.getTaskTag(code).setDescription(description);
     }
+
+    @Override
+    public void setTaskName(String taskId, String name) {
+        dao.getTask(taskId).setName(name);
+    }
+
+    @Override
+    public void setEntryRemark(String entryId, String remark) {
+        dao.getTaskEntry(entryId).setRemark(remark);
+    }
+
 }

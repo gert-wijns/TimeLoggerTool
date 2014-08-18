@@ -49,14 +49,12 @@ public class TaskListCell extends ListCell<TimeLoggerViewTask> {
     }
 
     private void setInactiveStyle() {
-        setStyle(null);
-        task.setStyle(null);
-        duration.setStyle(null);
+        getStyleClass().remove("active-task");
     }
 
     private void setActiveStyle() {
-        setStyle("-fx-background-color: green;");
-        task.setStyle("-fx-text-fill: white;");
-        duration.setStyle("-fx-text-fill: white;");
+        if (!getStyleClass().contains("active-task")) {
+            getStyleClass().add("active-task");
+        }
     }
 }

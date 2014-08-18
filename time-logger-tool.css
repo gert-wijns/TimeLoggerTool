@@ -1,0 +1,8 @@
+.active-task {
+    -fx-background-color: green;
+    -fx-text-fill: white;
+}
+.active-task .label {
+    -fx-background-color: green;
+    -fx-text-fill: white;
+}
