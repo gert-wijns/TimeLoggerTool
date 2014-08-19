@@ -1,21 +1,20 @@
 package be.shad.tl.ui.view;
 
-import java.util.concurrent.TimeUnit;
-
+import static be.shad.tl.util.TimeLoggerUtils.toTimeString;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import be.shad.tl.service.TimeLoggerDao;
+import be.shad.tl.service.TimeLoggerData;
 import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTask;
 
 public class RootLayoutController {
-    private TimeLoggerDao timeLoggerDao;
+    private TimeLoggerData timeLoggerDao;
 
-    public void setTimeLoggerDao(TimeLoggerDao timeLoggerDao) {
+    public void setTimeLoggerDao(TimeLoggerData timeLoggerDao) {
         this.timeLoggerDao = timeLoggerDao;
     }
 
@@ -42,12 +41,6 @@ public class RootLayoutController {
         Scene scene = new Scene(new Group(new TextArea(exportSB.toString())));
         dialog.setScene(scene);
         dialog.show();
-    }
-
-    private String toTimeString(Long duration) {
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(duration - TimeUnit.MINUTES.toMillis(minutes));
-        return String.format("%dm %2ds", minutes, seconds);
     }
 
     /**

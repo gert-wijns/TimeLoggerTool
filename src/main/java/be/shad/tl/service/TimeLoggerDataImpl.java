@@ -10,10 +10,11 @@ import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
 
-public class TimeLoggerDaoImpl implements TimeLoggerDao {
+public class TimeLoggerDataImpl implements TimeLoggerData {
     private PSequence<TimeLoggerTask> tasks = TreePVector.empty();
     private PSequence<TimeLoggerTag> tags = TreePVector.empty();
     private PSequence<TimeLoggerEntry> entries = TreePVector.empty();
+    private PMap<String, String> entryTask = HashTreePMap.empty();
     private PMap<String, PCollection<TimeLoggerTag>> taskTags = HashTreePMap.empty();
     private PMap<String, PCollection<TimeLoggerEntry>> taskEntries = HashTreePMap.empty();
 
@@ -68,8 +69,21 @@ public class TimeLoggerDaoImpl implements TimeLoggerDao {
     }
 
     @Override
+    public void removeTag(TimeLoggerTask task, TimeLoggerTag tag) {
+        taskTags = taskTags.plus(task.getId(), getTaskTags(task.getId()).minus(tag));
+    }
+
+    @Override
     public void addEntry(TimeLoggerTask task, TimeLoggerEntry entry) {
         taskEntries = taskEntries.plus(task.getId(), getTaskEntries(task.getId()).plus(entry));
+        entryTask = entryTask.plus(entry.getId(), task.getId());
+    }
+
+    @Override
+    public void removeEntry(TimeLoggerEntry entry) {
+        String taskId = entryTask.get(entry.getId());
+        entryTask = entryTask.minus(entry.getId());
+        taskEntries = taskEntries.plus(taskId, getTaskEntries(taskId).minus(entry));
     }
 
     @Override

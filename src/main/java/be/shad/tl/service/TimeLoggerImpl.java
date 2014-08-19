@@ -8,41 +8,19 @@ import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
 
+
 public class TimeLoggerImpl implements TimeLogger {
-    private final TimeLoggerDao dao;
+    private final TimeLoggerPersistence persistence;
+    private final TimeLoggerData data;
 
-    public TimeLoggerImpl(TimeLoggerDao dao) {
-        this.dao = dao;
-    }
-
-    @Override
-    public void tagTask(String taskId, String tagId) {
-        TimeLoggerTag taskTag = dao.getTaskTag(tagId);
-        if (taskTag == null) {
-            createTag(tagId);
-            tagTask(taskId, tagId);
-        } else {
-            dao.addTag(dao.getTask(taskId), taskTag);
-        }
-    }
-
-    @Override
-    public void startTask(String taskId) {
-        startTask(taskId, new Date());
+    public TimeLoggerImpl(TimeLoggerPersistence persistence, TimeLoggerData data) {
+        this.persistence = persistence;
+        this.data = data;
     }
 
     @Override
     public void startTask(String taskId, Date startDate) {
         startTask(taskId, UUID.randomUUID().toString(), startDate);
-    }
-
-    @Override
-    public void startTask(String taskId, String entryId, Date startDate) {
-        TimeLoggerEntry entry = new TimeLoggerEntry();
-        entry.setId(entryId);
-        entry.setStartDate(startDate);
-        dao.saveEntry(entry);
-        dao.addEntry(dao.getTask(taskId), entry);
     }
 
     @Override
@@ -52,7 +30,7 @@ public class TimeLoggerImpl implements TimeLogger {
 
     @Override
     public void stopTask(String taskId, Date endDate) {
-        Collection<TimeLoggerEntry> taskEntries = dao.getTaskEntries(taskId);
+        Collection<TimeLoggerEntry> taskEntries = data.getTaskEntries(taskId);
         for(TimeLoggerEntry entry: taskEntries) {
             if (entry.getEndDate() == null) {
                 stopTaskEntry(entry.getId(), endDate);
@@ -64,13 +42,47 @@ public class TimeLoggerImpl implements TimeLogger {
     }
 
     @Override
-    public void stopTaskEntry(String entryId, Date endDate) {
-        dao.getTaskEntry(entryId).setEndDate(endDate);
+    public String createTask(String name) {
+        return createTask(UUID.randomUUID().toString(), name);
     }
 
     @Override
-    public String createTask(String name) {
-        return createTask(UUID.randomUUID().toString(), name);
+    public void addTagToTask(String taskId, String tagId) {
+        TimeLoggerTag taskTag = getOrCreateTag(tagId);
+        data.addTag(data.getTask(taskId), taskTag);
+    }
+
+    private TimeLoggerTag getOrCreateTag(String tagId) {
+        TimeLoggerTag taskTag = data.getTaskTag(tagId);
+        if (taskTag == null) {
+            createTag(tagId);
+            return data.getTaskTag(tagId);
+        }
+        return taskTag;
+    }
+
+    @Override
+    public void removeTagFromTask(String taskId, String tagId) {
+        TimeLoggerTag taskTag = data.getTaskTag(tagId);
+        if (taskTag != null) {
+            data.removeTag(data.getTask(taskId), taskTag);
+        }
+    }
+
+    @Override
+    public void startTask(String taskId, String entryId, Date startDate) {
+        TimeLoggerEntry entry = new TimeLoggerEntry();
+        entry.setId(entryId);
+        entry.setStartDate(startDate);
+        data.saveEntry(entry);
+        data.addEntry(data.getTask(taskId), entry);
+        persistence.startTask(taskId, entryId, startDate);
+    }
+
+    @Override
+    public void stopTaskEntry(String entryId, Date endDate) {
+        data.getTaskEntry(entryId).setEndDate(endDate);
+        persistence.stopTaskEntry(entryId, endDate);
     }
 
     @Override
@@ -78,35 +90,57 @@ public class TimeLoggerImpl implements TimeLogger {
         TimeLoggerTask task = new TimeLoggerTask();
         task.setId(taskId);
         task.setName(name);
-        dao.saveTask(task);
+        data.saveTask(task);
+        persistence.createTask(taskId, name);
         return taskId;
     }
 
     @Override
     public void setTaskDescription(String taskId, String description) {
-        dao.getTask(taskId).setDescription(description);
+        data.getTask(taskId).setDescription(description);
+        persistence.setTaskDescription(taskId, description);
     }
 
     @Override
     public void createTag(String code) {
         TimeLoggerTag tag = new TimeLoggerTag();
         tag.setCode(code);
-        dao.saveTag(tag);
+        data.saveTag(tag);
     }
 
     @Override
     public void setTagDescription(String code, String description) {
-        dao.getTaskTag(code).setDescription(description);
+        getOrCreateTag(code).setDescription(description);
+        persistence.setTagDescription(code, description);
     }
 
     @Override
     public void setTaskName(String taskId, String name) {
-        dao.getTask(taskId).setName(name);
+        data.getTask(taskId).setName(name);
+        persistence.setTaskName(taskId, name);
     }
 
     @Override
     public void setEntryRemark(String entryId, String remark) {
-        dao.getTaskEntry(entryId).setRemark(remark);
+        data.getTaskEntry(entryId).setRemark(remark);
+        persistence.setEntryRemark(entryId, remark);
     }
 
+    @Override
+    public void removeEntry(String entryId) {
+        data.removeEntry(data.getTaskEntry(entryId));
+        persistence.removeEntry(entryId);
+    }
+
+    @Override
+    public void setEntryStartDate(String entryId, Date startDate) {
+        data.getTaskEntry(entryId).setStartDate(startDate);
+        persistence.setEntryStartDate(entryId, startDate);
+    }
+
+    @Override
+    public void setEntryEndDate(String entryId, Date endDate) {
+        data.getTaskEntry(entryId).setEndDate(endDate);
+        persistence.setEntryEndDate(entryId, endDate);
+    }
 }

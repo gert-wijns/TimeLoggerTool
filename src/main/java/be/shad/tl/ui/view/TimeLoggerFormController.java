@@ -26,7 +26,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import be.shad.tl.service.TimeLogger;
-import be.shad.tl.service.TimeLoggerDao;
+import be.shad.tl.service.TimeLoggerData;
 import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
@@ -54,13 +54,15 @@ public class TimeLoggerFormController {
     private ObservableList<TimeLoggerViewEntry> entries = observableArrayList();
     private ActiveTaskData activeTaskData = null;
 
-    private TimeLoggerDao timeLoggerDao;
+    private TimeLoggerData timeLoggerData;
     private TimeLogger timeLogger;
 
-    public void setTimeLoggerDao(TimeLoggerDao timeLoggerDao, TimeLogger timeLogger) {
-        this.timeLoggerDao = timeLoggerDao;
+    public void setTimeLogger(TimeLogger timeLogger) {
         this.timeLogger = timeLogger;
+    }
 
+    public void setTimeLoggerData(TimeLoggerData timeLoggerData) {
+        this.timeLoggerData = timeLoggerData;
         refreshTasks();
     }
 
@@ -77,13 +79,13 @@ public class TimeLoggerFormController {
         startDateColumn.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
         endDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
         remarkColumn.setCellValueFactory(cellData -> cellData.getValue().remarkProperty());
+        remarkColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
         taskList.setCellFactory(value -> new TaskListCell());
         taskList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showTaskDetails(newValue));
         taskList.setItems(tasks);
 
-        remarkColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         entriesTable.setEditable(true);
         entriesTable.setItems(entries);
 
@@ -97,22 +99,24 @@ public class TimeLoggerFormController {
     }
 
     private void refreshTasks() {
-        Collection<TimeLoggerTask> tasks = timeLoggerDao.getTasks();
+        Collection<TimeLoggerTask> tasks = timeLoggerData.getTasks();
         Collection<TimeLoggerViewTask> viewTasks = new LinkedList<>();
         for(TimeLoggerTask task: tasks) {
             TimeLoggerViewTask viewTask = new TimeLoggerViewTask(task);
             long duration = 0;
-            Collection<TimeLoggerEntry> entries = timeLoggerDao.getTaskEntries(task.getId());
+            Date activeTaskStartDate = null;
+            Collection<TimeLoggerEntry> entries = timeLoggerData.getTaskEntries(task.getId());
             for (TimeLoggerEntry entry: entries) {
                 if (entry.getEndDate() != null) {
                     duration += entry.getEndDate().getTime() - entry.getStartDate().getTime();
                 } else {
+                    activeTaskStartDate = entry.getStartDate();
                     viewTask.setActive(true);
                 }
             }
             viewTask.setDuration(duration);
             if (viewTask.isActive()) {
-                activeTaskData = new ActiveTaskData(viewTask);
+                activeTaskData = new ActiveTaskData(viewTask, activeTaskStartDate);
             }
             viewTasks.add(viewTask);
         }
@@ -129,7 +133,7 @@ public class TimeLoggerFormController {
             taskDescriptionField.setText(task.getDescription());
             taskNameCaptionLabel.setText(task.getName());
 
-            Collection<TimeLoggerTag> tags = timeLoggerDao.getTaskTags(task.getId());
+            Collection<TimeLoggerTag> tags = timeLoggerData.getTaskTags(task.getId());
             this.tags.setAll(tags.stream().
                 map(t -> new TimeLoggerViewTag(t.getCode(), t.getDescription())).
                 collect(Collectors.toList()));
@@ -142,7 +146,7 @@ public class TimeLoggerFormController {
             }
             tagsBox.getChildren().setAll(tagNodes);
 
-            Collection<TimeLoggerEntry> entries = timeLoggerDao.getTaskEntries(task.getId());
+            Collection<TimeLoggerEntry> entries = timeLoggerData.getTaskEntries(task.getId());
             this.entries.setAll(entries.stream().
                 map(e -> new TimeLoggerViewEntry(e)).
                 collect(Collectors.toList()));
@@ -154,18 +158,27 @@ public class TimeLoggerFormController {
         if (event.getClickCount() == 2) {
             TimeLoggerViewTask selectedTask = getSelectedTask();
             if (activeTaskData != null) {
-                activeTaskData.getTask().setActive(false);
-                timeLogger.stopTask(activeTaskData.getTask().getId());
-                if (activeTaskData.getTask().getId().equals(selectedTask.getId())) {
-                    activeTaskData = null;
+                boolean sameTask = activeTaskData.getTask().getId().equals(selectedTask.getId());
+                stopActiveTask();
+                if (sameTask) {
+                    // refresh task details
                     showTaskDetails(selectedTask);
                     return;
                 }
             }
-            activeTaskData = new ActiveTaskData(selectedTask);
+            Date startDate = new Date();
+            activeTaskData = new ActiveTaskData(selectedTask, startDate);
             selectedTask.setActive(true);
-            timeLogger.startTask(selectedTask.getId());
+            timeLogger.startTask(selectedTask.getId(), startDate);
             showTaskDetails(selectedTask);
+        }
+    }
+
+    public void stopActiveTask() {
+        if (activeTaskData != null) {
+            activeTaskData.getTask().setActive(false);
+            timeLogger.stopTask(activeTaskData.getTask().getId());
+            activeTaskData = null;
         }
     }
 

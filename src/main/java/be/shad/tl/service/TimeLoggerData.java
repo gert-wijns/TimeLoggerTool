@@ -6,7 +6,7 @@ import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
 
-public interface TimeLoggerDao {
+public interface TimeLoggerData {
 
     TimeLoggerTask getTask(String id);
 
@@ -21,12 +21,15 @@ public interface TimeLoggerDao {
     Collection<TimeLoggerEntry> getTaskEntries(String taskId);
 
     void addTag(TimeLoggerTask task, TimeLoggerTag tag);
+    void removeTag(TimeLoggerTask task, TimeLoggerTag taskTag);
 
     void addEntry(TimeLoggerTask task, TimeLoggerEntry entry);
+    void removeEntry(TimeLoggerEntry taskTag);
 
     TimeLoggerTask saveTask(TimeLoggerTask task);
 
     TimeLoggerTag saveTag(TimeLoggerTag tag);
 
     TimeLoggerEntry saveEntry(TimeLoggerEntry entry);
+
 }

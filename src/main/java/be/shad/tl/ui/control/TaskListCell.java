@@ -1,7 +1,6 @@
 package be.shad.tl.ui.control;
 
-import java.util.concurrent.TimeUnit;
-
+import static be.shad.tl.util.TimeLoggerUtils.toTimeString;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -34,9 +33,7 @@ public class TaskListCell extends ListCell<TimeLoggerViewTask> {
         super.updateItem(item, empty);
         if (item != null) {
             long duration = item.getDuration();
-            long minutes = TimeUnit.MILLISECONDS.toMinutes(duration);
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(duration - TimeUnit.MINUTES.toMillis(minutes));
-            this.duration.setText(String.format("%dm %2ds", minutes, seconds));
+            this.duration.setText(toTimeString(duration));
             active.setSelected(item.isActive());
             task.setText(item.getName());
             setGraphic(graphic);
