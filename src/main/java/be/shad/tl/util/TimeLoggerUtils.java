@@ -57,7 +57,7 @@ public class TimeLoggerUtils {
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.ESCAPE) {
                     armed.set(false);
-                    //textField.setText(binding.get());
+                    textField.setText(binding.get());
                     textField.getParent().requestFocus();
                 } else if (event.getCode() == KeyCode.ENTER) {
                     event.consume();
