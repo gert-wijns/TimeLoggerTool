@@ -2,6 +2,7 @@ package be.shad.tl.ui.view;
 
 import static javafx.collections.FXCollections.observableArrayList;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
@@ -12,16 +13,16 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.Observable;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
@@ -30,11 +31,13 @@ import be.shad.tl.service.TimeLoggerData;
 import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
+import be.shad.tl.ui.control.EditingTableCell;
 import be.shad.tl.ui.control.TaskListCell;
 import be.shad.tl.ui.model.ActiveTaskData;
 import be.shad.tl.ui.model.TimeLoggerViewEntry;
 import be.shad.tl.ui.model.TimeLoggerViewTag;
 import be.shad.tl.ui.model.TimeLoggerViewTask;
+import be.shad.tl.util.TimeLoggerUtils;
 
 public class TimeLoggerFormController {
     @FXML private ListView<TimeLoggerViewTask> taskList;
@@ -49,6 +52,9 @@ public class TimeLoggerFormController {
     @FXML private TextField taskNameField;
     @FXML private TextField taskDescriptionField;
 
+    private StringProperty taskNameValue = new SimpleStringProperty();
+    private StringProperty taskDescriptionValue = new SimpleStringProperty();
+    
     private ObservableList<TimeLoggerViewTask> tasks;
     private ObservableList<TimeLoggerViewTag> tags = observableArrayList();
     private ObservableList<TimeLoggerViewEntry> entries = observableArrayList();
@@ -79,7 +85,8 @@ public class TimeLoggerFormController {
         startDateColumn.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
         endDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
         remarkColumn.setCellValueFactory(cellData -> cellData.getValue().remarkProperty());
-        remarkColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        remarkColumn.setCellFactory((col) -> new EditingTableCell<>());
+        //remarkColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
         taskList.setCellFactory(value -> new TaskListCell());
         taskList.getSelectionModel().selectedItemProperty().addListener(
@@ -88,6 +95,11 @@ public class TimeLoggerFormController {
 
         entriesTable.setEditable(true);
         entriesTable.setItems(entries);
+        
+        TimeLoggerUtils.initTextFieldListener(taskNameField, taskNameValue, 
+                (newValue) -> handleOnTaskNameChange(newValue));
+        TimeLoggerUtils.initTextFieldListener(taskDescriptionField, taskDescriptionValue,
+                (newValue) -> handleOnTaskDescriptionChange(newValue));
 
         final Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             if (activeTaskData != null) {
@@ -129,8 +141,8 @@ public class TimeLoggerFormController {
             taskDescriptionField.setText("Description");
             tagsBox.getChildren().clear();
         } else {
-            taskNameField.setText(task.getName());
-            taskDescriptionField.setText(task.getDescription());
+            taskNameValue.set(task.getName());
+            taskDescriptionValue.set(task.getDescription());
             taskNameCaptionLabel.setText(task.getName());
 
             Collection<TimeLoggerTag> tags = timeLoggerData.getTaskTags(task.getId());
@@ -147,9 +159,16 @@ public class TimeLoggerFormController {
             tagsBox.getChildren().setAll(tagNodes);
 
             Collection<TimeLoggerEntry> entries = timeLoggerData.getTaskEntries(task.getId());
-            this.entries.setAll(entries.stream().
-                map(e -> new TimeLoggerViewEntry(e)).
-                collect(Collectors.toList()));
+            Collection<TimeLoggerViewEntry> viewEntries = new ArrayList<>(entries.size());
+            for(TimeLoggerEntry entry: entries) {
+                TimeLoggerViewEntry viewEntry = new TimeLoggerViewEntry(entry);
+                viewEntry.remarkProperty().addListener((observed, oldValue, newValue) -> {
+                    timeLogger.setEntryRemark(entry.getId(), newValue);
+                });
+                viewEntries.add(viewEntry);
+            }
+            
+            this.entries.setAll(viewEntries);
         }
     }
 
@@ -194,25 +213,17 @@ public class TimeLoggerFormController {
         }
     }
 
-    @FXML
-    private void handleOnTaskNameChange() {
+    private void handleOnTaskNameChange(String newValue) {
         TimeLoggerViewTask selectedTask = getSelectedTask();
-        timeLogger.setTaskName(selectedTask.getId(), taskNameField.getText());
+        timeLogger.setTaskName(selectedTask.getId(), newValue);
         selectedTask.setName(taskNameField.getText());
-        taskNameCaptionLabel.setText(taskNameField.getText());
+        taskNameCaptionLabel.setText(newValue);
     }
 
-    @FXML
-    private void handleOnTaskDescriptionChange() {
+    private void handleOnTaskDescriptionChange(String newValue) {
         TimeLoggerViewTask selectedTask = getSelectedTask();
-        timeLogger.setTaskDescription(selectedTask.getId(), taskDescriptionField.getText());
-        selectedTask.setDescription(taskDescriptionField.getText());
-    }
-
-    @FXML
-    private void handleRemarkEditCommit(CellEditEvent<TimeLoggerViewEntry, String> event) {
-        TimeLoggerViewEntry selectedItem = entriesTable.getSelectionModel().getSelectedItem();
-        timeLogger.setEntryRemark(selectedItem.getId(), event.getNewValue());
+        timeLogger.setTaskDescription(selectedTask.getId(), newValue);
+        selectedTask.setDescription(newValue);
     }
 
     private TimeLoggerViewTask getSelectedTask() {

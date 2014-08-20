@@ -65,11 +65,11 @@
                                                   </rowConstraints>
                                                   <children>
                                                       <Label text="Description" GridPane.rowIndex="2" />
-                                                      <TextField fx:id="taskDescriptionField" onAction="#handleOnTaskDescriptionChange" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                      <TextField fx:id="taskDescriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                       <Label text="Tags" />
                                                       <HBox fx:id="tagsBox" alignment="CENTER_LEFT" prefHeight="15.0" prefWidth="200.0" GridPane.columnIndex="1" />
                                           <Label text="Name" GridPane.rowIndex="1" />
-                                          <TextField fx:id="taskNameField" onAction="#handleOnTaskNameChange" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                          <TextField fx:id="taskNameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                   </children>
                                               </GridPane>
                                           </children>
@@ -81,7 +81,7 @@
                                           <columns>
                                               <TableColumn fx:id="startDateColumn" prefWidth="75.0" text="Start" />
                                               <TableColumn fx:id="endDateColumn" prefWidth="75.0" text="End" />
-                                    <TableColumn fx:id="remarkColumn" onEditCommit="#handleRemarkEditCommit" prefWidth="75.0" text="Remark" />
+                                    <TableColumn fx:id="remarkColumn" prefWidth="75.0" text="Remark" />
                                           </columns>
                                           <columnResizePolicy>
                                               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
