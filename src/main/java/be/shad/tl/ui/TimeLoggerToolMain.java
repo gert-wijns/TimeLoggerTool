@@ -92,6 +92,8 @@ public class TimeLoggerToolMain extends Application {
             if (f.exists()) {
                 scene.getStylesheets().clear();
                 scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+            } else {
+                scene.getStylesheets().add(getClass().getResource("time-logger-tool.css").toExternalForm());
             }
 
             // Give the controller access to the main app.
