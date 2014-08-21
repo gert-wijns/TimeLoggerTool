@@ -152,7 +152,10 @@ public class TimeLoggerFormController {
             taskNameField.setEditable(true);
             taskDescriptionField.setEditable(true);
             taskNameValue.setValue(task.getName());
+            taskNameField.setText(task.getName()); // setting field because otherwise if the was the same
+                                                   // for the previous task details.. the text will not be notified
             taskDescriptionValue.setValue(task.getDescription());
+            taskDescriptionField.setText(task.getDescription());
             taskNameCaptionLabel.setText(task.getName());
 
             Collection<TimeLoggerTag> tags = timeLoggerData.getTaskTags(task.getId());
