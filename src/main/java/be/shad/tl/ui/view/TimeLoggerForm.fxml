@@ -12,7 +12,7 @@
 
 <AnchorPane prefHeight="300.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.shad.tl.ui.view.TimeLoggerFormController">
     <children>
-        <SplitPane dividerPositions="0.29797979797979796" prefHeight="300.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <SplitPane dividerPositions="0.2391304347826087" prefHeight="300.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
@@ -22,14 +22,14 @@
                            <children>
                               <VBox prefHeight="272.0" prefWidth="220.0" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
                                  <children>
-                                    <HBox>
+                                    <HBox alignment="CENTER_LEFT" minHeight="30.0">
                                        <children>
                                           <Label prefHeight="17.0" prefWidth="9.0" text="+">
                                              <font>
                                                 <Font size="17.0" />
                                              </font>
                                           </Label>
-                                          <CustomTextField fx:id="taskCreationField" />
+                                          <CustomTextField fx:id="taskCreationField" prefColumnCount="8" prefWidth="5000.0" />
                                        </children>
                                     </HBox>
                                     <ListView fx:id="taskList" onMouseClicked="#handleOnTaskListClick" prefHeight="5000.0" prefWidth="174.0" />
