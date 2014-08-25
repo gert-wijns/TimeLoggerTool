@@ -4,3 +4,18 @@
 .active-task .label {
     -fx-text-fill: white;
 }
+.chart-entry-1 {
+    -fx-background-color: blue;
+}
+.chart-entry-2 {
+    -fx-background-color: red;
+}
+.chart-entry-3 {
+    -fx-background-color: purple;
+}
+.chart-entry-4 {
+    -fx-background-color: brown;
+}
+.chart-entry {
+    -fx-background-radius: 5.0;
+}
