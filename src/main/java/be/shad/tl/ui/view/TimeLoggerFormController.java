@@ -1,5 +1,6 @@
 package be.shad.tl.ui.view;
 
+import static be.shad.tl.ui.control.TextFieldCellFactory.forTableColumn;
 import static be.shad.tl.util.TextFields.setupDefaultTextField;
 import static javafx.collections.FXCollections.observableArrayList;
 
@@ -36,7 +37,6 @@ import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
 import be.shad.tl.ui.control.TaskListCell;
-import be.shad.tl.ui.control.TextFieldCellFactory;
 import be.shad.tl.ui.model.ActiveTaskData;
 import be.shad.tl.ui.model.TimeLoggerViewEntry;
 import be.shad.tl.ui.model.TimeLoggerViewTag;
@@ -89,7 +89,7 @@ public class TimeLoggerFormController {
         startDateColumn.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
         endDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
         remarkColumn.setCellValueFactory(cellData -> cellData.getValue().remarkProperty());
-        remarkColumn.setCellFactory(new TextFieldCellFactory<>());
+        remarkColumn.setCellFactory(forTableColumn());
 
         taskList.setCellFactory(value -> new TaskListCell());
         taskList.getSelectionModel().selectedItemProperty().addListener(

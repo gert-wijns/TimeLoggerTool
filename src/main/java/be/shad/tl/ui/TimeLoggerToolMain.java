@@ -98,7 +98,8 @@ public class TimeLoggerToolMain extends Application {
 
             // Give the controller access to the main app.
             RootLayoutController controller = loader.getController();
-            controller.setTimeLoggerDao(timeLoggerData);
+            controller.setTimeLoggerData(timeLoggerData);
+            controller.setTimeLogger(timeLogger);
 
             primaryStage.show();
         } catch (IOException e) {

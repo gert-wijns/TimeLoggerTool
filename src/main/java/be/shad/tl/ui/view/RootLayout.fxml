@@ -15,6 +15,11 @@
                   <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit" />
               </items>
             </Menu>
+            <Menu mnemonicParsing="false" text="Edit">
+              <items>
+                  <MenuItem mnemonicParsing="false" onAction="#handleShowEditEntriesList" text="Entries" />
+              </items>
+            </Menu>
         </menus>
       </MenuBar>
    </top>
