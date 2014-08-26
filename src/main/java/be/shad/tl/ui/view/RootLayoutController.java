@@ -22,6 +22,11 @@ import be.shad.tl.ui.TimeLoggerToolMain;
 public class RootLayoutController {
     private TimeLoggerData timeLoggerData;
     private TimeLogger timeLogger;
+    private Stage primaryStage;
+
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
 
     public void setTimeLogger(TimeLogger timeLogger) {
         this.timeLogger = timeLogger;
@@ -58,8 +63,9 @@ public class RootLayoutController {
 
     @FXML
     private void handleShowEditEntriesList() {
-        Stage dialog = new Stage(StageStyle.UTILITY);
+        Stage dialog = new Stage(StageStyle.DECORATED);
         dialog.initModality(Modality.WINDOW_MODAL);
+        dialog.initOwner(primaryStage);
         Scene scene = new Scene(loadEditEntriesListFXML());
         dialog.setScene(scene);
         dialog.showAndWait();

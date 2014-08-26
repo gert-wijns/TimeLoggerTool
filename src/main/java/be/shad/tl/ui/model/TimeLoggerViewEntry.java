@@ -12,6 +12,7 @@ public class TimeLoggerViewEntry {
     private StringProperty id;
     private ObjectProperty<Date> startDate;
     private ObjectProperty<Date> endDate;
+    private ObjectProperty<Long> duration;
     private StringProperty remark;
 
     public TimeLoggerViewEntry(TimeLoggerEntry entry) {
@@ -20,9 +21,10 @@ public class TimeLoggerViewEntry {
 
     public TimeLoggerViewEntry(String id, Date startDate, Date endDate, String remark) {
         this.id = new SimpleStringProperty(id);
-        this.startDate = new SimpleObjectProperty<Date>(startDate);
-        this.endDate = new SimpleObjectProperty<Date>(endDate);
+        this.startDate = new SimpleObjectProperty<>(startDate);
+        this.endDate = new SimpleObjectProperty<>(endDate);
         this.remark = new SimpleStringProperty(remark);
+        this.duration = new SimpleObjectProperty<>(endDate == null ? null: endDate.getTime() - startDate.getTime());
     }
 
     public final StringProperty idProperty() {
@@ -71,5 +73,17 @@ public class TimeLoggerViewEntry {
 
     public final void setRemark(final java.lang.String remark) {
         this.remarkProperty().set(remark);
+    }
+
+    public final ObjectProperty<Long> durationProperty() {
+        return this.duration;
+    }
+
+    public final Long getDuration() {
+        return this.durationProperty().get();
+    }
+
+    public final void setDuration(final Long duration) {
+        this.durationProperty().set(duration);
     }
 }

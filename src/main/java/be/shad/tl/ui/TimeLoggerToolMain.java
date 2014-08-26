@@ -100,6 +100,7 @@ public class TimeLoggerToolMain extends Application {
             RootLayoutController controller = loader.getController();
             controller.setTimeLoggerData(timeLoggerData);
             controller.setTimeLogger(timeLogger);
+            controller.setPrimaryStage(primaryStage);
 
             primaryStage.show();
         } catch (IOException e) {

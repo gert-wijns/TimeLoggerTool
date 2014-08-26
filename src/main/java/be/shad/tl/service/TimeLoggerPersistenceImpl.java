@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import be.shad.tl.service.loader.AddTagToTaskLoader;
 import be.shad.tl.service.loader.CreateTaskLoader;
@@ -27,6 +29,8 @@ import be.shad.tl.service.loader.StartTaskLoader;
 import be.shad.tl.service.loader.StopTaskEntryLoader;
 
 public class TimeLoggerPersistenceImpl implements TimeLoggerPersistence {
+    protected final Logger logger = LogManager.getLogger(getClass());
+
     private final SetTaskDescriptionLoader setTaskDescriptionLoader;
     private final SetTagDescriptionLoader setTagDescriptionLoader;
     private final SetEntryStartDateLoader setEntryStartDateLoader;
@@ -111,7 +115,9 @@ public class TimeLoggerPersistenceImpl implements TimeLoggerPersistence {
                         count++;
                     }
                 }
-                lines.addFirst(params.getId() + " " + params.getRevision() + " " + count);
+                String line = params.getId() + " " + params.getRevision() + " " + count;
+                logger.trace("Saving: {} with: {}", params.getId(), params.getParameters());
+                lines.addFirst(line);
                 FileUtils.writeLines(save, lines, null, true);
             } catch (IOException e) {
                 throw new RuntimeException(e);

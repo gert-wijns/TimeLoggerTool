@@ -80,8 +80,9 @@
                                       </VBox>
                                       <TableView fx:id="entriesTable" prefHeight="100.0" prefWidth="200.0">
                                           <columns>
-                                              <TableColumn fx:id="startDateColumn" prefWidth="75.0" text="Start" />
-                                              <TableColumn fx:id="endDateColumn" prefWidth="75.0" text="End" />
+                                              <TableColumn fx:id="startDateColumn" onEditCommit="#handleStartDateEditCommit" prefWidth="75.0" text="Start" />
+                                              <TableColumn fx:id="endDateColumn" onEditCommit="#handleEndDateEditCommit" prefWidth="75.0" text="End" />
+                                    <TableColumn fx:id="durationColumn" onEditCommit="#handleDurationEditCommit" prefWidth="75.0" text="Duration" />
                                     <TableColumn fx:id="remarkColumn" onEditCommit="#handleRemarkEditCommit" prefWidth="75.0" text="Remark" />
                                           </columns>
                                           <columnResizePolicy>

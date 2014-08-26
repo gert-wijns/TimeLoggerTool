@@ -11,8 +11,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
-import javafx.util.converter.DefaultStringConverter;
+
+import org.controlsfx.dialog.DialogStyle;
+import org.controlsfx.dialog.Dialogs;
+
+import be.shad.tl.ui.converter.DefaultStringConverter;
+import be.shad.tl.ui.converter.StringConversionError;
+import be.shad.tl.ui.converter.StringConverter;
 
 public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, TableCell<T, S>> {
     //StringConverter<T>
@@ -76,14 +81,27 @@ public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, T
         private void onFocusChanged(Boolean focused) {
             updateContentDisplay();
             if (!focused) {
-                CellEditEvent<T, S> editEvent = new CellEditEvent<>(
-                    getTableView(),
-                    new TablePosition<>(getTableView(), getIndex(), getTableColumn()),
-                    TableColumn.editCommitEvent(),
-                    converter.fromString(getText())
-                );
-                Event.fireEvent(getTableColumn(), editEvent);
+                try {
+                    S converted = converter.fromString(getText());
+                    CellEditEvent<T, S> editEvent = new CellEditEvent<>(
+                        getTableView(),
+                        new TablePosition<>(getTableView(), getIndex(), getTableColumn()),
+                        TableColumn.editCommitEvent(),
+                        converted
+                    );
+                    Event.fireEvent(getTableColumn(), editEvent);
+                } catch (StringConversionError e) {
+                    onConversionError(e);
+                }
             }
+        }
+
+        private void onConversionError(StringConversionError e) {
+            Dialogs.create().
+                style(DialogStyle.CROSS_PLATFORM_DARK).
+                title("Conversion failed").
+                message("Couldn't convert value, illegal format.").
+                showExceptionInNewWindow(e);
         }
 
         /**

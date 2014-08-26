@@ -11,6 +11,8 @@ import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
 
 public class TimeLoggerDataImpl implements TimeLoggerData {
+    //protected final Logger logger = LogManager.getLogger(getClass());
+
     private PSequence<TimeLoggerTask> tasks = TreePVector.empty();
     private PSequence<TimeLoggerTag> tags = TreePVector.empty();
     private PSequence<TimeLoggerEntry> entries = TreePVector.empty();

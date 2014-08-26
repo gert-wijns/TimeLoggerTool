@@ -2,7 +2,7 @@ package be.shad.tl.service.loader;
 
 import static be.shad.tl.service.loader.LoaderConstants.END_DATE;
 import static be.shad.tl.service.loader.LoaderConstants.ENTRY_ID;
-import static be.shad.tl.service.loader.LoaderConstants.SET_ENTRY_START_DATE;
+import static be.shad.tl.service.loader.LoaderConstants.SET_ENTRY_END_DATE;
 
 import java.util.Date;
 
@@ -26,6 +26,6 @@ public class SetEntryEndDateLoader implements Loader {
 
     @Override
     public String getId() {
-        return SET_ENTRY_START_DATE;
+        return SET_ENTRY_END_DATE;
     }
 }

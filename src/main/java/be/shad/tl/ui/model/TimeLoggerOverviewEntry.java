@@ -2,9 +2,7 @@ package be.shad.tl.ui.model;
 
 import java.util.Date;
 
-import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -15,7 +13,7 @@ public class TimeLoggerOverviewEntry {
     private StringProperty entryId;
     private ObjectProperty<Date> startDate;
     private ObjectProperty<Date> endDate;
-    private LongProperty duration;
+    private ObjectProperty<Long> duration;
 
     public TimeLoggerOverviewEntry() {
         taskId = new SimpleStringProperty();
@@ -23,7 +21,7 @@ public class TimeLoggerOverviewEntry {
         entryId = new SimpleStringProperty();
         startDate = new SimpleObjectProperty<>();
         endDate = new SimpleObjectProperty<>();
-        duration = new SimpleLongProperty();
+        duration = new SimpleObjectProperty<>();
     }
 
     public final StringProperty taskIdProperty() {
@@ -86,15 +84,15 @@ public class TimeLoggerOverviewEntry {
         this.endDateProperty().set(endDate);
     }
 
-    public final LongProperty durationProperty() {
+    public final ObjectProperty<Long> durationProperty() {
         return this.duration;
     }
 
-    public final long getDuration() {
+    public final Long getDuration() {
         return this.durationProperty().get();
     }
 
-    public final void setDuration(final long duration) {
+    public final void setDuration(final Long duration) {
         this.durationProperty().set(duration);
     }
 }

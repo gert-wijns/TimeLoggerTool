@@ -1,13 +1,10 @@
 package be.shad.tl.ui.view;
 
 import static be.shad.tl.ui.control.TextFieldCellFactory.forTableColumn;
+import static be.shad.tl.util.TimeLoggerUtils.isNotEqual;
 import static javafx.collections.FXCollections.observableArrayList;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -17,14 +14,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
-import javafx.util.StringConverter;
-
-import org.controlsfx.dialog.Dialogs;
-
 import be.shad.tl.service.TimeLogger;
 import be.shad.tl.service.TimeLoggerData;
 import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTask;
+import be.shad.tl.ui.converter.DurationConverter;
+import be.shad.tl.ui.converter.EntryOverviewDateConverter;
 import be.shad.tl.ui.model.TimeLoggerOverviewEntry;
 
 public class TimeLoggerEntriesFormController {
@@ -35,7 +30,7 @@ public class TimeLoggerEntriesFormController {
     @FXML private TableColumn<TimeLoggerOverviewEntry, String> taskNameColumn;
     @FXML private TableColumn<TimeLoggerOverviewEntry, Date> startDateColumn;
     @FXML private TableColumn<TimeLoggerOverviewEntry, Date> endDateColumn;
-    @FXML private TableColumn<TimeLoggerOverviewEntry, String> durationColumn;
+    @FXML private TableColumn<TimeLoggerOverviewEntry, Long> durationColumn;
 
     private ObservableList<TimeLoggerOverviewEntry> entries = observableArrayList();
 
@@ -58,6 +53,9 @@ public class TimeLoggerEntriesFormController {
                 row.setEntryId(entry.getId());
                 row.setStartDate(entry.getStartDate());
                 row.setEndDate(entry.getEndDate());
+                if (entry.getEndDate() != null) {
+                    row.setDuration(entry.getEndDate().getTime() - entry.getStartDate().getTime());
+                }
                 rows.add(row);
             }
         }
@@ -72,37 +70,38 @@ public class TimeLoggerEntriesFormController {
         taskNameColumn.setCellValueFactory(cellData -> cellData.getValue().taskNameProperty());
         startDateColumn.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
         endDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
-
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM hh:mm");
-        DateFormat backDateFormat = new SimpleDateFormat("yyyy/dd/MM hh:mm");
-        StringConverter<Date> dateConverter = new StringConverter<Date>() {
-            @Override
-            public String toString(Date object) {
-                return object == null ? "": dateFormat.format(object);
-            }
-
-            @Override
-            public Date fromString(String string) {
-                try {
-                    return backDateFormat.parse(Calendar.getInstance().get(Calendar.YEAR) + "/" + string);
-                } catch (ParseException e) {
-                    Dialogs.create().message("Conversion failed... ").showError();
-                    return null;
-                }
-            }
-        };
-        startDateColumn.setCellFactory(forTableColumn(dateConverter));
-        endDateColumn.setCellFactory(forTableColumn(dateConverter));
+        durationColumn.setCellValueFactory(cellData -> cellData.getValue().durationProperty());
+        startDateColumn.setCellFactory(forTableColumn(new EntryOverviewDateConverter()));
+        endDateColumn.setCellFactory(forTableColumn(new EntryOverviewDateConverter()));
+        durationColumn.setCellFactory(forTableColumn(new DurationConverter()));
     }
 
     @FXML
     private void handleStartDateEditCommit(CellEditEvent<TimeLoggerOverviewEntry, Date> event) {
-        timeLogger.setEntryStartDate(event.getRowValue().getEntryId(), event.getNewValue());
+        if (isNotEqual(event.getRowValue().getStartDate(), event.getNewValue())) {
+            timeLogger.setEntryStartDate(event.getRowValue().getEntryId(), event.getNewValue());
+            refresh();
+        }
     }
 
     @FXML
     private void handleEndDateEditCommit(CellEditEvent<TimeLoggerOverviewEntry, Date> event) {
-        timeLogger.setEntryEndDate(event.getRowValue().getEntryId(), event.getNewValue());
+        if (isNotEqual(event.getRowValue().getEndDate(), event.getNewValue())) {
+            timeLogger.setEntryEndDate(event.getRowValue().getEntryId(), event.getNewValue());
+            refresh();
+        }
+    }
+
+    @FXML
+    private void handleDurationEditCommit(CellEditEvent<TimeLoggerOverviewEntry, Number> event) {
+        if (event.getNewValue() != null) {
+            long startTime = event.getRowValue().getStartDate().getTime();
+            Date endDate = new Date(startTime + event.getNewValue().longValue());
+            if (isNotEqual(event.getRowValue().getEndDate(), endDate)) {
+                timeLogger.setEntryEndDate(event.getRowValue().getEntryId(), endDate);
+                refresh();
+            }
+        }
     }
 
     @FXML

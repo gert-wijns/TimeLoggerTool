@@ -2,6 +2,7 @@ package be.shad.tl.ui.view;
 
 import static be.shad.tl.ui.control.TextFieldCellFactory.forTableColumn;
 import static be.shad.tl.util.TextFields.setupDefaultTextField;
+import static be.shad.tl.util.TimeLoggerUtils.isNotEqual;
 import static javafx.collections.FXCollections.observableArrayList;
 
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
 import be.shad.tl.ui.control.TaskListCell;
+import be.shad.tl.ui.converter.DurationConverter;
+import be.shad.tl.ui.converter.EntryOverviewDateConverter;
 import be.shad.tl.ui.model.ActiveTaskData;
 import be.shad.tl.ui.model.TimeLoggerViewEntry;
 import be.shad.tl.ui.model.TimeLoggerViewTag;
@@ -47,6 +50,7 @@ public class TimeLoggerFormController {
     @FXML private TableView<TimeLoggerViewEntry> entriesTable;
     @FXML private TableColumn<TimeLoggerViewEntry, Date> startDateColumn;
     @FXML private TableColumn<TimeLoggerViewEntry, Date> endDateColumn;
+    @FXML private TableColumn<TimeLoggerViewEntry, Long> durationColumn;
     @FXML private TableColumn<TimeLoggerViewEntry, String> remarkColumn;
     @FXML private HBox tagsBox;
 
@@ -88,6 +92,10 @@ public class TimeLoggerFormController {
         // Initialize the person table with the two columns.
         startDateColumn.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
         endDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
+        durationColumn.setCellValueFactory(cellData -> cellData.getValue().durationProperty());
+        startDateColumn.setCellFactory(forTableColumn(new EntryOverviewDateConverter()));
+        endDateColumn.setCellFactory(forTableColumn(new EntryOverviewDateConverter()));
+        durationColumn.setCellFactory(forTableColumn(new DurationConverter()));
         remarkColumn.setCellValueFactory(cellData -> cellData.getValue().remarkProperty());
         remarkColumn.setCellFactory(forTableColumn());
 
@@ -118,26 +126,41 @@ public class TimeLoggerFormController {
     private void refreshTasks() {
         Collection<TimeLoggerTask> tasks = timeLoggerData.getTasks();
         Collection<TimeLoggerViewTask> viewTasks = new LinkedList<>();
+        activeTaskData = null;
         for(TimeLoggerTask task: tasks) {
             TimeLoggerViewTask viewTask = new TimeLoggerViewTask(task);
-            long duration = 0;
-            Date activeTaskStartDate = null;
-            Collection<TimeLoggerEntry> entries = timeLoggerData.getTaskEntries(task.getId());
-            for (TimeLoggerEntry entry: entries) {
-                if (entry.getEndDate() != null) {
-                    duration += entry.getEndDate().getTime() - entry.getStartDate().getTime();
-                } else {
-                    activeTaskStartDate = entry.getStartDate();
+            viewTask.setDuration(getTaskDuration(task.getId()));
+            if (activeTaskData == null) {
+                TimeLoggerEntry activeEntry = getActiveEntry(task.getId());
+                if (activeEntry != null) {
                     viewTask.setActive(true);
+                    activeTaskData = new ActiveTaskData(viewTask, activeEntry.getStartDate());
                 }
-            }
-            viewTask.setDuration(duration);
-            if (viewTask.isActive()) {
-                activeTaskData = new ActiveTaskData(viewTask, activeTaskStartDate);
             }
             viewTasks.add(viewTask);
         }
         this.tasks.setAll(viewTasks);
+    }
+
+    private TimeLoggerEntry getActiveEntry(String taskId) {
+        Collection<TimeLoggerEntry> entries = timeLoggerData.getTaskEntries(taskId);
+        for (TimeLoggerEntry entry: entries) {
+            if (entry.getEndDate() == null) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    private long getTaskDuration(String taskId) {
+        long duration = 0;
+        Collection<TimeLoggerEntry> entries = timeLoggerData.getTaskEntries(taskId);
+        for (TimeLoggerEntry entry: entries) {
+            if (entry.getEndDate() != null) {
+                duration += entry.getEndDate().getTime() - entry.getStartDate().getTime();
+            }
+        }
+        return duration;
     }
 
     private void showTaskDetails(TimeLoggerViewTask task) {
@@ -225,7 +248,7 @@ public class TimeLoggerFormController {
 
     private void handleOnTaskNameChange(String name) {
         TimeLoggerViewTask selectedTask = getSelectedTask();
-        if (selectedTask != null) {
+        if (selectedTask != null && isNotEqual(selectedTask.getName(), name)) {
             timeLogger.setTaskName(selectedTask.getId(), name);
             selectedTask.setName(name);
             taskNameCaptionLabel.setText(taskNameField.getText());
@@ -234,7 +257,7 @@ public class TimeLoggerFormController {
 
     private void handleOnTaskDescriptionChange(String description) {
         TimeLoggerViewTask selectedTask = getSelectedTask();
-        if (selectedTask != null) {
+        if (selectedTask != null && isNotEqual(selectedTask.getDescription(), description)) {
             timeLogger.setTaskDescription(selectedTask.getId(), description);
             selectedTask.setDescription(description);
         }
@@ -243,6 +266,40 @@ public class TimeLoggerFormController {
     @FXML
     private void handleRemarkEditCommit(CellEditEvent<TimeLoggerViewEntry, String> event) {
         timeLogger.setEntryRemark(event.getRowValue().getId(), event.getNewValue());
+    }
+
+    @FXML
+    private void handleStartDateEditCommit(CellEditEvent<TimeLoggerViewEntry, Date> event) {
+        if (isNotEqual(event.getRowValue().getStartDate(), event.getNewValue())) {
+            timeLogger.setEntryStartDate(event.getRowValue().getId(), event.getNewValue());
+            onEntryDurationUpdate();
+        }
+    }
+
+    private void onEntryDurationUpdate() {
+        TimeLoggerViewTask selectedTask = getSelectedTask();
+        refreshTasks();
+        showTaskDetails(selectedTask);
+    }
+
+    @FXML
+    private void handleEndDateEditCommit(CellEditEvent<TimeLoggerViewEntry, Date> event) {
+        if (isNotEqual(event.getRowValue().getEndDate(), event.getNewValue())) {
+            timeLogger.setEntryEndDate(event.getRowValue().getId(), event.getNewValue());
+            onEntryDurationUpdate();
+        }
+    }
+
+    @FXML
+    private void handleDurationEditCommit(CellEditEvent<TimeLoggerViewEntry, Number> event) {
+        if (event.getNewValue() != null) {
+            long startTime = event.getRowValue().getStartDate().getTime();
+            Date endDate = new Date(startTime + event.getNewValue().longValue());
+            if (isNotEqual(event.getRowValue().getEndDate(), endDate)) {
+                timeLogger.setEntryEndDate(event.getRowValue().getId(), endDate);
+                onEntryDurationUpdate();
+            }
+        }
     }
 
     private TimeLoggerViewTask getSelectedTask() {
