@@ -1,9 +1,9 @@
-package be.shad.tl.ui.model.ui.event;
+package be.shad.tl.ui.model.event;
 
-public class TaskStoppedEvent implements Event {
+public class TaskSelectedEvent implements Event {
     private final String taskId;
 
-    public TaskStoppedEvent(String taskId) {
+    public TaskSelectedEvent(String taskId) {
         this.taskId = taskId;
     }
 

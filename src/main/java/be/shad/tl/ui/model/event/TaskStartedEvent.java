@@ -1,4 +1,4 @@
-package be.shad.tl.ui.model.ui.event;
+package be.shad.tl.ui.model.event;
 
 public class TaskStartedEvent implements Event {
     private final String taskId;

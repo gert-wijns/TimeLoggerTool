@@ -8,15 +8,15 @@ import be.shad.tl.service.TimeLogger;
 import be.shad.tl.service.TimeLoggerData;
 import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTask;
-import be.shad.tl.ui.model.TimeLoggerOverviewEntry;
+import be.shad.tl.ui.model.TimeLoggerViewEntry;
 import be.shad.tl.ui.model.TimeLoggerViewTask;
-import be.shad.tl.ui.model.ui.event.EntryChangedEvent;
-import be.shad.tl.ui.model.ui.event.Event;
-import be.shad.tl.ui.model.ui.event.TaskCreatedEvent;
-import be.shad.tl.ui.model.ui.event.TaskModifiedEvent;
-import be.shad.tl.ui.model.ui.event.TaskSelectedEvent;
-import be.shad.tl.ui.model.ui.event.TaskStartedEvent;
-import be.shad.tl.ui.model.ui.event.TaskStoppedEvent;
+import be.shad.tl.ui.model.event.EntryChangedEvent;
+import be.shad.tl.ui.model.event.Event;
+import be.shad.tl.ui.model.event.TaskCreatedEvent;
+import be.shad.tl.ui.model.event.TaskModifiedEvent;
+import be.shad.tl.ui.model.event.TaskSelectedEvent;
+import be.shad.tl.ui.model.event.TaskStartedEvent;
+import be.shad.tl.ui.model.event.TaskStoppedEvent;
 
 public class TimeLoggerController {
     private final TimeLoggerData timeLoggerData;
@@ -70,12 +70,12 @@ public class TimeLoggerController {
         }
     }
 
-    public void snapToPrevious(TimeLoggerOverviewEntry current, TimeLoggerOverviewEntry previous) {
+    public void snapToPrevious(TimeLoggerViewEntry current, TimeLoggerViewEntry previous) {
         timeLogger.setEntryStartDate(current.getEntryId(), previous.getEndDate());
         dispatchEvent(new EntryChangedEvent(current.getEntryId()));
     }
 
-    public void snapToNext(TimeLoggerOverviewEntry current, TimeLoggerOverviewEntry next) {
+    public void snapToNext(TimeLoggerViewEntry current, TimeLoggerViewEntry next) {
         timeLogger.setEntryEndDate(current.getEntryId(), next.getStartDate());
         dispatchEvent(new EntryChangedEvent(current.getEntryId()));
     }

@@ -6,37 +6,60 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import be.shad.tl.service.model.TimeLoggerEntry;
 
 public class TimeLoggerViewEntry {
-    private StringProperty id;
+    private StringProperty taskId;
+    private StringProperty taskName;
+    private StringProperty entryId;
+    private StringProperty remark;
     private ObjectProperty<Date> startDate;
     private ObjectProperty<Date> endDate;
     private ObjectProperty<Long> duration;
-    private StringProperty remark;
 
-    public TimeLoggerViewEntry(TimeLoggerEntry entry) {
-        this(entry.getId(), entry.getStartDate(), entry.getEndDate(), entry.getRemark());
+    public TimeLoggerViewEntry() {
+        taskId = new SimpleStringProperty();
+        taskName = new SimpleStringProperty();
+        remark = new SimpleStringProperty();
+        entryId = new SimpleStringProperty();
+        startDate = new SimpleObjectProperty<>();
+        endDate = new SimpleObjectProperty<>();
+        duration = new SimpleObjectProperty<>();
     }
 
-    public TimeLoggerViewEntry(String id, Date startDate, Date endDate, String remark) {
-        this.id = new SimpleStringProperty(id);
-        this.startDate = new SimpleObjectProperty<>(startDate);
-        this.endDate = new SimpleObjectProperty<>(endDate);
-        this.remark = new SimpleStringProperty(remark);
-        this.duration = new SimpleObjectProperty<>(endDate == null ? null: endDate.getTime() - startDate.getTime());
+    public final StringProperty taskIdProperty() {
+        return this.taskId;
     }
 
-    public final StringProperty idProperty() {
-        return this.id;
+    public final java.lang.String getTaskId() {
+        return this.taskIdProperty().get();
     }
 
-    public final java.lang.String getId() {
-        return this.idProperty().get();
+    public final void setTaskId(final java.lang.String taskId) {
+        this.taskIdProperty().set(taskId);
     }
 
-    public final void setId(final java.lang.String id) {
-        this.idProperty().set(id);
+    public final StringProperty taskNameProperty() {
+        return this.taskName;
+    }
+
+    public final java.lang.String getTaskName() {
+        return this.taskNameProperty().get();
+    }
+
+    public final void setTaskName(final java.lang.String taskName) {
+        this.taskNameProperty().set(taskName);
+    }
+
+    public final StringProperty entryIdProperty() {
+        return this.entryId;
+    }
+
+    public final java.lang.String getEntryId() {
+        return this.entryIdProperty().get();
+    }
+
+    public final void setEntryId(final java.lang.String entryId) {
+        this.entryIdProperty().set(entryId);
     }
 
     public final ObjectProperty<Date> startDateProperty() {
@@ -63,18 +86,6 @@ public class TimeLoggerViewEntry {
         this.endDateProperty().set(endDate);
     }
 
-    public final StringProperty remarkProperty() {
-        return this.remark;
-    }
-
-    public final java.lang.String getRemark() {
-        return this.remarkProperty().get();
-    }
-
-    public final void setRemark(final java.lang.String remark) {
-        this.remarkProperty().set(remark);
-    }
-
     public final ObjectProperty<Long> durationProperty() {
         return this.duration;
     }
@@ -85,5 +96,17 @@ public class TimeLoggerViewEntry {
 
     public final void setDuration(final Long duration) {
         this.durationProperty().set(duration);
+    }
+
+    public final StringProperty remarkProperty() {
+        return this.remark;
+    }
+
+    public final java.lang.String getRemark() {
+        return this.remarkProperty().get();
+    }
+
+    public final void setRemark(final java.lang.String remark) {
+        this.remarkProperty().set(remark);
     }
 }

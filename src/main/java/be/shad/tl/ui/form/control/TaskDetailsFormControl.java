@@ -11,8 +11,8 @@ import javafx.scene.layout.HBox;
 import org.controlsfx.control.textfield.CustomTextField;
 
 import be.shad.tl.service.model.TimeLoggerTask;
-import be.shad.tl.ui.model.ui.event.TaskModifiedEvent;
-import be.shad.tl.ui.model.ui.event.TaskSelectedEvent;
+import be.shad.tl.ui.model.event.TaskModifiedEvent;
+import be.shad.tl.ui.model.event.TaskSelectedEvent;
 
 import com.google.common.eventbus.Subscribe;
 

@@ -25,11 +25,11 @@ import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTask;
 import be.shad.tl.ui.control.TaskListCell;
 import be.shad.tl.ui.model.TimeLoggerViewTask;
-import be.shad.tl.ui.model.ui.event.EntryChangedEvent;
-import be.shad.tl.ui.model.ui.event.TaskCreatedEvent;
-import be.shad.tl.ui.model.ui.event.TaskModifiedEvent;
-import be.shad.tl.ui.model.ui.event.TaskStartedEvent;
-import be.shad.tl.ui.model.ui.event.TaskStoppedEvent;
+import be.shad.tl.ui.model.event.EntryChangedEvent;
+import be.shad.tl.ui.model.event.TaskCreatedEvent;
+import be.shad.tl.ui.model.event.TaskModifiedEvent;
+import be.shad.tl.ui.model.event.TaskStartedEvent;
+import be.shad.tl.ui.model.event.TaskStoppedEvent;
 
 import com.google.common.eventbus.Subscribe;
 
