@@ -13,7 +13,7 @@ public class DurationConverter implements StringConverter<Long> {
     private static final TimeUnit[] TIME_UNITS = {HOURS, MINUTES, SECONDS};
 
     @Override
-    public String toString(Long object) {
+    public String toDisplayString(Long object) {
         if (object == null) {
             return "";
         }
@@ -30,6 +30,11 @@ public class DurationConverter implements StringConverter<Long> {
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public String toEditString(Long value) {
+        return toDisplayString(value);
     }
 
     @Override

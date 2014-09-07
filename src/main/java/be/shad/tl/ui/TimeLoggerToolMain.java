@@ -1,13 +1,11 @@
 package be.shad.tl.ui;
 
 import java.io.File;
-import java.io.IOException;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -16,14 +14,20 @@ import be.shad.tl.service.TimeLoggerData;
 import be.shad.tl.service.TimeLoggerDataImpl;
 import be.shad.tl.service.TimeLoggerImpl;
 import be.shad.tl.service.TimeLoggerPersistenceImpl;
-import be.shad.tl.ui.view.RootLayoutController;
-import be.shad.tl.ui.view.TimeLoggerFormController;
+import be.shad.tl.service.model.TimeLoggerTask;
+import be.shad.tl.ui.form.TimeLoggerController;
+import be.shad.tl.ui.form.TimeLoggerModel;
+import be.shad.tl.ui.form.TimeLoggerView;
 
 public class TimeLoggerToolMain extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
     private TimeLoggerData timeLoggerData;
     private TimeLogger timeLogger;
+
+    private TimeLoggerController controller;
+    private TimeLoggerModel model;
+    private TimeLoggerView view;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -40,36 +44,25 @@ public class TimeLoggerToolMain extends Application {
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("TimeLoggerTool");
 
+        model = new TimeLoggerModel(timeLoggerData);
+        controller = new TimeLoggerController(timeLoggerData, timeLogger, model);
+        view = new TimeLoggerView(model, controller, primaryStage);
+
         // Set the application icon.
-        //this.primaryStage.getIcons().add(new Image("file:resources/images/address_book_32.png"));
+        this.primaryStage.getIcons().add(new Image("images/application_icon.png"));
 
+        rootLayout = view.loadRootFormControl();
         initRootLayout();
-        showTasksForm();
-    }
+        rootLayout.setCenter(view.loadTimeLoggerFormControl());
 
-    private void showTasksForm() {
-        try {
-            // Load person overview.
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(TimeLoggerToolMain.class.getResource("view/TimeLoggerForm.fxml"));
-            AnchorPane personOverview = (AnchorPane) loader.load();
-
-            // Set person overview into the center of root layout.
-            rootLayout.setCenter(personOverview);
-
-            // Give the controller access to the main app.
-            TimeLoggerFormController controller = loader.getController();
-            controller.setTimeLoggerData(timeLoggerData);
-            controller.setTimeLogger(timeLogger);
-
-            this.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                public void handle(WindowEvent we) {
-                    controller.stopActiveTask();
+        this.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                TimeLoggerTask activeTask = timeLoggerData.getActiveTask();
+                if (activeTask != null) {
+                    timeLogger.stopTask(activeTask.getId());
                 }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            }
+        });
     }
 
     /**
@@ -77,35 +70,18 @@ public class TimeLoggerToolMain extends Application {
      * person file.
      */
     public void initRootLayout() {
-        try {
-            // Load root layout from fxml file.
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(TimeLoggerToolMain.class
-                    .getResource("view/RootLayout.fxml"));
-            rootLayout = (BorderPane) loader.load();
+        // Show the scene containing the root layout.
+        Scene scene = new Scene(rootLayout);
+        primaryStage.setScene(scene);
 
-            // Show the scene containing the root layout.
-            Scene scene = new Scene(rootLayout);
-            primaryStage.setScene(scene);
-
-            File f = new File("time-logger-tool.css");
-            if (f.exists()) {
-                scene.getStylesheets().clear();
-                scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
-            } else {
-                scene.getStylesheets().add(getClass().getResource("time-logger-tool.css").toExternalForm());
-            }
-
-            // Give the controller access to the main app.
-            RootLayoutController controller = loader.getController();
-            controller.setTimeLoggerData(timeLoggerData);
-            controller.setTimeLogger(timeLogger);
-            controller.setPrimaryStage(primaryStage);
-
-            primaryStage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        File f = new File("time-logger-tool.css");
+        if (f.exists()) {
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add("file:///" + f.getAbsolutePath().replace("\\", "/"));
+        } else {
+            scene.getStylesheets().add(getClass().getResource("time-logger-tool.css").toExternalForm());
         }
+        primaryStage.show();
     }
 
     public static void main(String[] args) {

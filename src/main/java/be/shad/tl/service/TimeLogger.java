@@ -10,6 +10,9 @@ public interface TimeLogger {
 
     void stopTask(String taskId, Date endDate);
 
+    /**
+     * @return taskId of the created task
+     */
     String createTask(String name);
 
     void startTask(String taskId, String entryId, Date startDate);

@@ -1,5 +1,7 @@
 package be.shad.tl.service;
 
+import java.util.Map.Entry;
+
 import org.pcollections.HashTreePMap;
 import org.pcollections.PCollection;
 import org.pcollections.PMap;
@@ -19,6 +21,18 @@ public class TimeLoggerDataImpl implements TimeLoggerData {
     private PMap<String, String> entryTask = HashTreePMap.empty();
     private PMap<String, PCollection<TimeLoggerTag>> taskTags = HashTreePMap.empty();
     private PMap<String, PCollection<TimeLoggerEntry>> taskEntries = HashTreePMap.empty();
+
+    @Override
+    public TimeLoggerTask getActiveTask() {
+        for(Entry<String, PCollection<TimeLoggerEntry>> mapEntry: taskEntries.entrySet()) {
+            for(TimeLoggerEntry entry: mapEntry.getValue()) {
+                if (entry.getEndDate() == null) {
+                    return getTask(mapEntry.getKey());
+                }
+            }
+        }
+        return null;
+    }
 
     @Override
     public TimeLoggerTask getTask(String id) {

@@ -2,8 +2,13 @@ package be.shad.tl.ui.converter;
 
 public class DefaultStringConverter implements StringConverter<String> {
     @Override
-    public String toString(String value) {
+    public String toDisplayString(String value) {
         return (value != null) ? value : "";
+    }
+
+    @Override
+    public String toEditString(String value) {
+        return toDisplayString(value);
     }
 
     @Override

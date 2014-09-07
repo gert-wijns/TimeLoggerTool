@@ -70,8 +70,8 @@ public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, T
         protected void updateItem(S item, boolean empty) {
             super.updateItem(item, empty);
             if (!empty) {
-                textField.setText(converter.toString(getCellProperty().getValue()));
-                setText(textField.getText());
+                textField.setText(converter.toEditString(getCellProperty().getValue()));
+                setText(converter.toDisplayString(getCellProperty().getValue()));
             } else {
                 setText(null);
             }
@@ -82,7 +82,7 @@ public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, T
             updateContentDisplay();
             if (!focused) {
                 try {
-                    S converted = converter.fromString(getText());
+                    S converted = converter.fromString(textField.getText());
                     CellEditEvent<T, S> editEvent = new CellEditEvent<>(
                         getTableView(),
                         new TablePosition<>(getTableView(), getIndex(), getTableColumn()),

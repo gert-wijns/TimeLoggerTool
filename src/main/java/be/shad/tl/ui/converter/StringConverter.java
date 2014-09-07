@@ -3,11 +3,14 @@ package be.shad.tl.ui.converter;
 
 public interface StringConverter<T> {
     /**
-    * Converts the object provided into its string form.
-    * Format of the returned string is defined by the specific converter.
-    * @return a string representation of the object passed in.
+    * Converts the value provided into its string form for display
     */
-    String toString(T object);
+    String toDisplayString(T value);
+
+    /**
+    * Converts the value provided into its string form for edit
+    */
+    String toEditString(T value);
 
     /**
     * Converts the string provided into an object defined by the specific converter.

@@ -11,6 +11,7 @@ public class TimeLoggerOverviewEntry {
     private StringProperty taskId;
     private StringProperty taskName;
     private StringProperty entryId;
+    private StringProperty remark;
     private ObjectProperty<Date> startDate;
     private ObjectProperty<Date> endDate;
     private ObjectProperty<Long> duration;
@@ -18,6 +19,7 @@ public class TimeLoggerOverviewEntry {
     public TimeLoggerOverviewEntry() {
         taskId = new SimpleStringProperty();
         taskName = new SimpleStringProperty();
+        remark = new SimpleStringProperty();
         entryId = new SimpleStringProperty();
         startDate = new SimpleObjectProperty<>();
         endDate = new SimpleObjectProperty<>();
@@ -94,5 +96,17 @@ public class TimeLoggerOverviewEntry {
 
     public final void setDuration(final Long duration) {
         this.durationProperty().set(duration);
+    }
+
+    public final StringProperty remarkProperty() {
+        return this.remark;
+    }
+
+    public final java.lang.String getRemark() {
+        return this.remarkProperty().get();
+    }
+
+    public final void setRemark(final java.lang.String remark) {
+        this.remarkProperty().set(remark);
     }
 }

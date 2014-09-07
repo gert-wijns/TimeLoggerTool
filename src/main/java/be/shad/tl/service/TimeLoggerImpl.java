@@ -73,6 +73,7 @@ public class TimeLoggerImpl implements TimeLogger {
     public void startTask(String taskId, String entryId, Date startDate) {
         TimeLoggerEntry entry = new TimeLoggerEntry();
         entry.setId(entryId);
+        entry.setTaskId(taskId);
         entry.setStartDate(startDate);
         data.saveEntry(entry);
         data.addEntry(data.getTask(taskId), entry);

@@ -12,7 +12,7 @@ import be.shad.tl.ui.converter.DurationConverter;
 public class TimeLoggerUtils {
 
     public static String toTimeString(long duration) {
-        return new DurationConverter().toString(duration);
+        return new DurationConverter().toDisplayString(duration);
     }
 
     public static void initTextFieldListener(TextField textField,
