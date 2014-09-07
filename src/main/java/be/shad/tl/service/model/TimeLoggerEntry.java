@@ -5,6 +5,7 @@ import java.util.Date;
 public class TimeLoggerEntry {
 
     private String id;
+    private String taskId;
     private Date startDate;
     private Date endDate;
     private String remark;
@@ -15,6 +16,14 @@ public class TimeLoggerEntry {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 
     public Date getStartDate() {

@@ -12,29 +12,53 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 
-public class TextFieldCellFactory<T> implements Callback<TableColumn<T, String>, TableCell<T, String>> {
+import org.controlsfx.dialog.DialogStyle;
+import org.controlsfx.dialog.Dialogs;
 
-    @Override
-    public TableCell<T, String> call(TableColumn<T, String> param) {
-        return new TextFieldCell<>();
+import be.shad.tl.ui.converter.DefaultStringConverter;
+import be.shad.tl.ui.converter.StringConversionError;
+import be.shad.tl.ui.converter.StringConverter;
+
+public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, TableCell<T, S>> {
+    //StringConverter<T>
+    public static <T> Callback<TableColumn<T, String>, TableCell<T, String>> forTableColumn() {
+        return new TextFieldCellFactory<T, String>(new DefaultStringConverter());
     }
 
-    public static class TextFieldCell<T> extends TableCell<T, String> {
+    public static <T, S> Callback<TableColumn<T, S>, TableCell<T, S>> forTableColumn(
+            final StringConverter<S> converter) {
+        return new TextFieldCellFactory<T, S>(converter);
+    }
+
+    private StringConverter<S> converter;
+
+    public TextFieldCellFactory(StringConverter<S> converter) {
+        this.converter = converter;
+    }
+
+    @Override
+    public TableCell<T, S> call(TableColumn<T, S> param) {
+        return new TextFieldCell<>(converter);
+    }
+
+    public static class TextFieldCell<T, S> extends TableCell<T, S> {
+        private final StringConverter<S> converter;
         private TextField textField;
 
-        public TextFieldCell() {
-            textField = new TextField();
+        public TextFieldCell(StringConverter<S> converter) {
+            this.converter = converter;
+            this.textField = new TextField();
             // padding to 0 so the 'graphics' and 'text' are equal in size
-            textField.setStyle("-fx-padding: 0;");
-            this.setGraphic(textField);
+            this.textField.setStyle("-fx-padding: 0;");
+            this.setGraphic(this.textField);
 
             hoverProperty().addListener((property, oldValue, newValue) -> updateContentDisplay());
-            textField.focusedProperty().addListener((property, oldValue, newValue) -> onFocusChanged(newValue));
-            textField.textProperty().addListener((property, oldValue, newValue) -> setText(newValue));
-            textField.addEventFilter(KeyEvent.ANY, (event) -> {
+            this.textField.focusedProperty().addListener((property, oldValue, newValue) -> onFocusChanged(newValue));
+            this.textField.textProperty().addListener((property, oldValue, newValue) -> setText(newValue));
+            this.textField.addEventFilter(KeyEvent.ANY, (event) -> {
                 if (event.getCode() == KeyCode.ENTER
                         || event.getCode() == KeyCode.ESCAPE) {
-                    textField.getParent().requestFocus();
+                    this.textField.getParent().requestFocus();
                 }
             });
         }
@@ -43,11 +67,11 @@ public class TextFieldCellFactory<T> implements Callback<TableColumn<T, String>,
          * Reset text and textfield value to the backing property value
          */
         @Override
-        protected void updateItem(String item, boolean empty) {
+        protected void updateItem(S item, boolean empty) {
             super.updateItem(item, empty);
             if (!empty) {
-                textField.setText(getCellProperty().getValue());
-                setText(textField.getText());
+                textField.setText(converter.toEditString(getCellProperty().getValue()));
+                setText(converter.toDisplayString(getCellProperty().getValue()));
             } else {
                 setText(null);
             }
@@ -57,14 +81,27 @@ public class TextFieldCellFactory<T> implements Callback<TableColumn<T, String>,
         private void onFocusChanged(Boolean focused) {
             updateContentDisplay();
             if (!focused) {
-                CellEditEvent<T, String> editEvent = new CellEditEvent<>(
-                    getTableView(),
-                    new TablePosition<>(getTableView(), getIndex(), getTableColumn()),
-                    TableColumn.editCommitEvent(),
-                    getText()
-                );
-                Event.fireEvent(getTableColumn(), editEvent);
+                try {
+                    S converted = converter.fromString(textField.getText());
+                    CellEditEvent<T, S> editEvent = new CellEditEvent<>(
+                        getTableView(),
+                        new TablePosition<>(getTableView(), getIndex(), getTableColumn()),
+                        TableColumn.editCommitEvent(),
+                        converted
+                    );
+                    Event.fireEvent(getTableColumn(), editEvent);
+                } catch (StringConversionError e) {
+                    onConversionError(e);
+                }
             }
+        }
+
+        private void onConversionError(StringConversionError e) {
+            Dialogs.create().
+                style(DialogStyle.CROSS_PLATFORM_DARK).
+                title("Conversion failed").
+                message("Couldn't convert value, illegal format.").
+                showExceptionInNewWindow(e);
         }
 
         /**
@@ -79,8 +116,8 @@ public class TextFieldCellFactory<T> implements Callback<TableColumn<T, String>,
             }
         }
 
-        private Property<String> getCellProperty() {
-            return (Property<String>) getTableColumn().getCellObservableValue(getIndex());
+        private Property<S> getCellProperty() {
+            return (Property<S>) getTableColumn().getCellObservableValue(getIndex());
         }
     }
 

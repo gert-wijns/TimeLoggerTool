@@ -8,6 +8,8 @@ import be.shad.tl.service.model.TimeLoggerTask;
 
 public interface TimeLoggerData {
 
+    TimeLoggerTask getActiveTask();
+
     TimeLoggerTask getTask(String id);
 
     TimeLoggerTag getTaskTag(String code);
