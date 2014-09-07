@@ -15,17 +15,19 @@ public class TimeLoggerViewTask {
     private StringProperty description;
     private LongProperty duration;
     private BooleanProperty active;
+    private BooleanProperty locked;
 
     public TimeLoggerViewTask(TimeLoggerTask task) {
-        this(task.getId(), task.getName(), task.getDescription(), 0L, false);
+        this(task.getId(), task.getName(), task.getDescription(), 0L, false, false);
     }
 
-    public TimeLoggerViewTask(String id, String name, String description, Long duration, Boolean active) {
+    public TimeLoggerViewTask(String id, String name, String description, Long duration, Boolean active, Boolean locked) {
         this.id = new SimpleStringProperty(id);
         this.name = new SimpleStringProperty(name);
         this.description = new SimpleStringProperty(description);
         this.active = new SimpleBooleanProperty(active);
         this.duration = new SimpleLongProperty(duration);
+        this.locked = new SimpleBooleanProperty(locked);
     }
 
     public final StringProperty idProperty() {
@@ -86,5 +88,17 @@ public class TimeLoggerViewTask {
 
     public final void setDuration(final long duration) {
         this.durationProperty().set(duration);
+    }
+
+    public final BooleanProperty lockedProperty() {
+        return this.locked;
+    }
+
+    public final boolean isLocked() {
+        return this.lockedProperty().get();
+    }
+
+    public final void setLocked(final boolean locked) {
+        this.lockedProperty().set(locked);
     }
 }

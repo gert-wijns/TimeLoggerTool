@@ -126,4 +126,18 @@ public class TimeLoggerController {
         String taskId = timeLogger.createTask(name);
         dispatchEvent(new TaskCreatedEvent(taskId));
     }
+
+    public void removeTag(String taskId, String tag) {
+        timeLogger.removeTagFromTask(taskId, tag);
+        dispatchEvent(new TaskModifiedEvent(taskId));
+    }
+
+    public void addTag(String taskId, String tag) {
+        timeLogger.addTagToTask(taskId, tag);
+        dispatchEvent(new TaskModifiedEvent(taskId));
+    }
+
+    public String getEntriesAsCsvString() {
+        return timeLogger.getEntriesAsCsvString();
+    }
 }

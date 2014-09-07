@@ -38,20 +38,24 @@ public class TaskListCell extends ListCell<TimeLoggerViewTask> {
             task.setText(item.getName());
             setGraphic(graphic);
             if (item.isActive()) {
-                setActiveStyle();
+                setTaskStyle("active-task");
+                return;
+            } else if (item.isLocked()) {
+                setTaskStyle("locked-task");
                 return;
             }
         }
-        setInactiveStyle();
+        unsetTaskStyle("active-task");
+        unsetTaskStyle("locked-task");
     }
 
-    private void setInactiveStyle() {
-        getStyleClass().remove("active-task");
+    private void unsetTaskStyle(String styleClass) {
+        getStyleClass().remove(styleClass);
     }
 
-    private void setActiveStyle() {
-        if (!getStyleClass().contains("active-task")) {
-            getStyleClass().add("active-task");
+    private void setTaskStyle(String styleClass) {
+        if (!getStyleClass().contains(styleClass)) {
+            getStyleClass().add(styleClass);
         }
     }
 }

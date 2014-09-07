@@ -14,14 +14,20 @@ import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
 import be.shad.tl.service.model.TimeLoggerEntry;
+import be.shad.tl.service.model.TimeLoggerTag;
 import be.shad.tl.service.model.TimeLoggerTask;
 import be.shad.tl.ui.control.TaskListCell;
 import be.shad.tl.ui.model.TimeLoggerViewTask;
@@ -34,6 +40,8 @@ import be.shad.tl.ui.model.event.TaskStoppedEvent;
 import com.google.common.eventbus.Subscribe;
 
 public class TasksFormControl extends AbstractFormControl {
+    public static final String LOCKED_TAG = "locked";
+
     @FXML private CustomTextField taskCreationField;
     @FXML private ListView<TimeLoggerViewTask> taskList;
     private StringProperty taskCreationValue = new SimpleStringProperty();
@@ -127,6 +135,17 @@ public class TasksFormControl extends AbstractFormControl {
                 getTask(item.getId());
         item.setDescription(task.getDescription());
         item.setName(task.getName());
+        item.setLocked(isLocked(item.getId()));
+    }
+
+    private boolean isLocked(String taskId) {
+        Collection<TimeLoggerTag> tags = model.getTimeLoggerData().getTaskTags(taskId);
+        for(TimeLoggerTag tag: tags) {
+            if (LOCKED_TAG.equals(tag.getCode())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateTaskDuration(TimeLoggerViewTask item) {
@@ -147,9 +166,33 @@ public class TasksFormControl extends AbstractFormControl {
 
     @FXML
     private void handleOnTaskListClick(MouseEvent event) {
-        if (event.getClickCount() == 2) {
-            controller.changeActivateTask(taskList.getSelectionModel().getSelectedItem().getId());
+        TimeLoggerViewTask selectedItem = taskList.getSelectionModel().getSelectedItem();
+        if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
+            if (!selectedItem.isLocked()) {
+                controller.changeActivateTask(selectedItem.getId());
+            }
+        } else if (event.getClickCount() == 1 && event.getButton() == MouseButton.SECONDARY) {
+            if (!selectedItem.isActive()) {
+                showPopupMenu(event, selectedItem);
+            }
         }
+    }
+
+    private void showPopupMenu(MouseEvent event, TimeLoggerViewTask selectedItem) {
+        final ContextMenu contextMenu = new ContextMenu();
+        MenuItem lockMenuItem = new MenuItem(selectedItem.isLocked() ? "Unlock": "Lock");
+        lockMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                if (selectedItem.isLocked()) {
+                    controller.removeTag(selectedItem.getId(), LOCKED_TAG);
+                } else {
+                    controller.addTag(selectedItem.getId(), LOCKED_TAG);
+                }
+                contextMenu.hide();
+            }
+        });
+        contextMenu.getItems().add(lockMenuItem);
+        contextMenu.show(event.getPickResult().getIntersectedNode(), event.getScreenX(), event.getScreenY());
     }
 
     private void handleOnTaskCreation(String name) {

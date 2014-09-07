@@ -4,3 +4,9 @@
 .active-task .label {
     -fx-text-fill: white;
 }
+.locked-task  {
+    -fx-background-color: red;
+}
+.locked-task .label {
+    -fx-text-fill: white;
+}

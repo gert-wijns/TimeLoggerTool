@@ -40,4 +40,6 @@ public interface TimeLogger {
     void addTagToTask(String taskId, String tagId);
 
     void removeTagFromTask(String taskId, String tagId);
+
+    String getEntriesAsCsvString();
 }

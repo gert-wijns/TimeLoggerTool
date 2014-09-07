@@ -11,7 +11,8 @@
         <menus>
             <Menu mnemonicParsing="false" text="File">
               <items>
-                  <MenuItem mnemonicParsing="false" onAction="#handleExport" text="Export" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleExportTaskDurations" text="Export durations" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleExportEntries" text="Export entries" />
                   <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit" />
               </items>
             </Menu>

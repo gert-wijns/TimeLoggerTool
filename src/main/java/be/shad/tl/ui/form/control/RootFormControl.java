@@ -30,7 +30,7 @@ public class RootFormControl extends AbstractFormControl {
     }
 
     @FXML
-    private void handleExport() {
+    private void handleExportTaskDurations() {
         StringBuilder exportSB = new StringBuilder();
         long logTotal = 0;
         for(TimeLoggerTask task: model.getTimeLoggerData().getTasks()) {
@@ -46,11 +46,19 @@ public class RootFormControl extends AbstractFormControl {
             logTotal += taskTotal;
         }
         exportSB.append("\nTotal: ").append(toTimeString(logTotal));
+        showExportInDialog(exportSB.toString());
+    }
 
+    @FXML
+    private void handleExportEntries() {
+        showExportInDialog(controller.getEntriesAsCsvString());
+    }
+
+    private void showExportInDialog(String text) {
         Stage dialog = new Stage();
         dialog.initStyle(StageStyle.UTILITY);
         dialog.setTitle("Export");
-        TextArea textArea = new TextArea(exportSB.toString());
+        TextArea textArea = new TextArea(text);
         Scene scene = new Scene(new AnchorPane(textArea));
         AnchorPane.setTopAnchor(textArea, 0d);
         AnchorPane.setBottomAnchor(textArea, 0d);
