@@ -53,7 +53,8 @@ public class TasksFormControl extends AbstractFormControl {
         taskMap = new HashMap<>();
         taskList.setCellFactory(value -> new TaskListCell());
         taskList.setItems(observableArrayList(task -> new Observable[] {
-                task.nameProperty(), task.durationProperty()}));
+                task.nameProperty(), task.durationProperty(),
+                task.lockedProperty() }));
         taskList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) ->
                 controller.selectTask(newValue));
