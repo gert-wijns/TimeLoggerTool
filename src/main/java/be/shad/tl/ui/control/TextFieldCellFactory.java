@@ -1,6 +1,10 @@
 package be.shad.tl.ui.control;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.Event;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
@@ -19,20 +23,25 @@ import be.shad.tl.ui.converter.DefaultStringConverter;
 import be.shad.tl.ui.converter.StringConversionError;
 import be.shad.tl.ui.converter.StringConverter;
 
-public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, TableCell<T, S>> {
+public class TextFieldCellFactory<T, S, C extends StringConverter<S>> implements Callback<TableColumn<T, S>, TableCell<T, S>> {
     //StringConverter<T>
     public static <T> Callback<TableColumn<T, String>, TableCell<T, String>> forTableColumn() {
-        return new TextFieldCellFactory<T, String>(new DefaultStringConverter());
+        return new TextFieldCellFactory<T, String, StringConverter<String>>(
+                new SimpleObjectProperty<>(new DefaultStringConverter()));
     }
 
-    public static <T, S> Callback<TableColumn<T, S>, TableCell<T, S>> forTableColumn(
-            final StringConverter<S> converter) {
-        return new TextFieldCellFactory<T, S>(converter);
+    /**
+     * Create a callback to create table cells which will listen to the converter invalidation
+     * to update items in case the converter configuration may change after the table was created.
+     */
+    public static <T, S, C extends StringConverter<S>> Callback<TableColumn<T, S>, TableCell<T, S>> forTableColumn(
+            final ObjectProperty<C> converter) {
+        return new TextFieldCellFactory<T, S, C>(converter);
     }
 
-    private StringConverter<S> converter;
+    private ObjectProperty<C> converter;
 
-    public TextFieldCellFactory(StringConverter<S> converter) {
+    public TextFieldCellFactory(ObjectProperty<C> converter) {
         this.converter = converter;
     }
 
@@ -41,12 +50,14 @@ public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, T
         return new TextFieldCell<>(converter);
     }
 
-    public static class TextFieldCell<T, S> extends TableCell<T, S> {
-        private final StringConverter<S> converter;
+    public static class TextFieldCell<T, S, C extends StringConverter<S>> extends TableCell<T, S> {
+        private final ObjectProperty<C> converter;
+        private InvalidationListener converterListener = ((o) -> onConverterChanged());
         private TextField textField;
 
-        public TextFieldCell(StringConverter<S> converter) {
+        public TextFieldCell(ObjectProperty<C> converter) {
             this.converter = converter;
+            this.converter.addListener(new WeakInvalidationListener(converterListener));
             this.textField = new TextField();
             // padding to 0 so the 'graphics' and 'text' are equal in size
             this.textField.setStyle("-fx-padding: 0;");
@@ -63,6 +74,12 @@ public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, T
             });
         }
 
+        private void onConverterChanged() {
+            if (!isEmpty()) {
+                updateIndex(getIndex());
+            }
+        }
+
         /**
          * Reset text and textfield value to the backing property value
          */
@@ -70,8 +87,8 @@ public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, T
         protected void updateItem(S item, boolean empty) {
             super.updateItem(item, empty);
             if (!empty) {
-                textField.setText(converter.toEditString(getCellProperty().getValue()));
-                setText(converter.toDisplayString(getCellProperty().getValue()));
+                textField.setText(converter.get().toEditString(getCellProperty().getValue()));
+                setText(converter.get().toDisplayString(getCellProperty().getValue()));
             } else {
                 setText(null);
             }
@@ -82,7 +99,7 @@ public class TextFieldCellFactory<T, S> implements Callback<TableColumn<T, S>, T
             updateContentDisplay();
             if (!focused) {
                 try {
-                    S converted = converter.fromString(textField.getText());
+                    S converted = converter.get().fromString(textField.getText());
                     CellEditEvent<T, S> editEvent = new CellEditEvent<>(
                         getTableView(),
                         new TablePosition<>(getTableView(), getIndex(), getTableColumn()),

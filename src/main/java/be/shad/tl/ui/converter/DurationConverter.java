@@ -8,7 +8,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.TimeUnit;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
 public class DurationConverter implements StringConverter<Long> {
+    public static final ObjectProperty<DurationConverter> STANDARD_DURATION_CONVERTER = createStandardDurationConverterProperty();
     private static final String[] TIME_UNIT_LITERALS = {"h", "m", "s"};
     private static final TimeUnit[] TIME_UNITS = {HOURS, MINUTES, SECONDS};
 
@@ -30,6 +34,10 @@ public class DurationConverter implements StringConverter<Long> {
             }
         }
         return sb.toString();
+    }
+
+    private static ObjectProperty<DurationConverter> createStandardDurationConverterProperty() {
+        return new SimpleObjectProperty<>(new DurationConverter());
     }
 
     @Override

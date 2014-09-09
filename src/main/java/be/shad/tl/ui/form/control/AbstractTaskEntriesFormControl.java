@@ -1,6 +1,8 @@
 package be.shad.tl.ui.form.control;
 
 import static be.shad.tl.ui.control.TextFieldCellFactory.forTableColumn;
+import static be.shad.tl.ui.converter.DateConverter.STANDARD_DATE_CONVERTER;
+import static be.shad.tl.ui.converter.DurationConverter.STANDARD_DURATION_CONVERTER;
 import static be.shad.tl.util.TimeLoggerUtils.isNotEqual;
 
 import java.util.ArrayList;
@@ -14,8 +16,6 @@ import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import be.shad.tl.service.model.TimeLoggerEntry;
 import be.shad.tl.service.model.TimeLoggerTask;
-import be.shad.tl.ui.converter.DateConverter;
-import be.shad.tl.ui.converter.DurationConverter;
 import be.shad.tl.ui.model.TimeLoggerViewEntry;
 import be.shad.tl.ui.model.event.EntryChangedEvent;
 
@@ -39,9 +39,9 @@ public abstract class AbstractTaskEntriesFormControl extends AbstractFormControl
         endDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
         durationColumn.setCellValueFactory(cellData -> cellData.getValue().durationProperty());
         remarkColumn.setCellValueFactory(cellData -> cellData.getValue().remarkProperty());
-        startDateColumn.setCellFactory(forTableColumn(new DateConverter()));
-        endDateColumn.setCellFactory(forTableColumn(new DateConverter()));
-        durationColumn.setCellFactory(forTableColumn(new DurationConverter()));
+        startDateColumn.setCellFactory(forTableColumn(STANDARD_DATE_CONVERTER));
+        endDateColumn.setCellFactory(forTableColumn(STANDARD_DATE_CONVERTER));
+        durationColumn.setCellFactory(forTableColumn(STANDARD_DURATION_CONVERTER));
         remarkColumn.setCellFactory(forTableColumn());
         entriesTable.setEditable(true);
     }

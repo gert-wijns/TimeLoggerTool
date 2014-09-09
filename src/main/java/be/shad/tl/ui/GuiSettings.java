@@ -50,7 +50,9 @@ public class GuiSettings {
     public void setDisplayDateFormat(String dateFormatString) {
         dateFormatString = updateDateFormat(DISPLAY_DATE_FORMAT_SETTING, DEFAULT_DISPLAY_FORMAT, dateFormatString);
         this.displayDateFormatString.set(dateFormatString);
+        this.displayDateFormatString.get(); // trigger to make value valid
         this.displayDateFormat.set(new SimpleDateFormat(dateFormatString));
+        this.displayDateFormat.get(); // trigger to make value valid
     }
 
     public ReadOnlyObjectProperty<String> getEditDateFormatString() {
@@ -64,7 +66,9 @@ public class GuiSettings {
     public void setEditDateFormat(String dateFormatString) {
         dateFormatString = updateDateFormat(EDIT_DATE_FORMAT_SETTING, DEFAULT_EDIT_FORMAT, dateFormatString);
         this.dateFormatString.set(dateFormatString);
+        this.dateFormatString.get(); // trigger to make value valid
         this.dateFormat.set(new SimpleDateFormat(dateFormatString));
+        this.dateFormat.get(); // trigger to make value valid
     }
 
     public String updateDateFormat(String setting, String defaultDateFormat, String dateFormatString) {

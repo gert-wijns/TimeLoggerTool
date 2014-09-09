@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>be.shad</groupId>
     <artifactId>TimeLoggerTool</artifactId>
-    <version>0.0.6</version>
+    <version>0.0.8</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
