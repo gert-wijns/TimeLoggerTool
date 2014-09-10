@@ -21,8 +21,11 @@ public class DurationConverter implements StringConverter<Long> {
         if (object == null) {
             return "";
         }
-        StringBuilder sb = new StringBuilder();
         long duration = object;
+        if (duration <= 0) {
+            return "0s";
+        }
+        StringBuilder sb = new StringBuilder();
         for(int i=0; i < TIME_UNIT_LITERALS.length; i++) {
             long part = TIME_UNITS[i].convert(duration, TimeUnit.MILLISECONDS);
             if (part > 0) {

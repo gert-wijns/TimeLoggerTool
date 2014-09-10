@@ -140,12 +140,22 @@ public class TimeLoggerImpl implements TimeLogger {
 
     @Override
     public void setEntryStartDate(String entryId, Date startDate) {
-        data.getTaskEntry(entryId).setStartDate(startDate);
+        TimeLoggerEntry taskEntry = data.getTaskEntry(entryId);
+        if (taskEntry.getEndDate() != null && taskEntry.getEndDate().before(startDate)) {
+            taskEntry.setEndDate(startDate);
+            persistence.setEntryEndDate(entryId, startDate);
+        }
+        taskEntry.setStartDate(startDate);
         persistence.setEntryStartDate(entryId, startDate);
     }
 
     @Override
     public void setEntryEndDate(String entryId, Date endDate) {
+        TimeLoggerEntry taskEntry = data.getTaskEntry(entryId);
+        if (taskEntry.getStartDate().after(endDate)) {
+            taskEntry.setStartDate(endDate);
+            persistence.setEntryStartDate(entryId, endDate);
+        }
         data.getTaskEntry(entryId).setEndDate(endDate);
         persistence.setEntryEndDate(entryId, endDate);
     }
