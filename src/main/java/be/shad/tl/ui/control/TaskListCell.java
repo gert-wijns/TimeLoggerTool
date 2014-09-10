@@ -9,6 +9,8 @@ import javafx.scene.layout.HBox;
 import be.shad.tl.ui.model.TimeLoggerViewTask;
 
 public class TaskListCell extends ListCell<TimeLoggerViewTask> {
+    private static final String LOCKED_TASK_STYLE_CLASS = "locked-task";
+    private static final String ACTIVE_TASK_STYLE_CLASS = "active-task";
     private final CheckBox active = new CheckBox();
     private final Label task = new Label();
     private final Label duration = new Label();
@@ -31,22 +33,25 @@ public class TaskListCell extends ListCell<TimeLoggerViewTask> {
     @Override
     protected void updateItem(TimeLoggerViewTask item, boolean empty) {
         super.updateItem(item, empty);
-        if (item != null) {
+        if (empty) {
+            setGraphic(null);
+            unsetTaskStyle(ACTIVE_TASK_STYLE_CLASS);
+            unsetTaskStyle(LOCKED_TASK_STYLE_CLASS);
+        } else {
             long duration = item.getDuration();
             this.duration.setText(toTimeString(duration));
             active.setSelected(item.isActive());
             task.setText(item.getName());
             setGraphic(graphic);
             if (item.isActive()) {
-                setTaskStyle("active-task");
-                return;
+                setTaskStyle(ACTIVE_TASK_STYLE_CLASS);
             } else if (item.isLocked()) {
-                setTaskStyle("locked-task");
-                return;
+                setTaskStyle(LOCKED_TASK_STYLE_CLASS);
+            } else {
+                unsetTaskStyle(ACTIVE_TASK_STYLE_CLASS);
+                unsetTaskStyle(LOCKED_TASK_STYLE_CLASS);
             }
         }
-        unsetTaskStyle("active-task");
-        unsetTaskStyle("locked-task");
     }
 
     private void unsetTaskStyle(String styleClass) {
