@@ -170,7 +170,7 @@ public class TimeLoggerImpl implements TimeLogger {
             exportSB.append("|").append(task.getName());
             exportSB.append("|").append(isoFormat.format(entry.getStartDate()));
             exportSB.append("|").append(entry.getEndDate() == null ? "": isoFormat.format(entry.getEndDate()));
-            exportSB.append("|").append(entry.getRemark());
+            exportSB.append("|").append(entry.getRemark() == null ? "": entry.getRemark());
             exportSB.append("\n");
         }
         return exportSB.toString();
