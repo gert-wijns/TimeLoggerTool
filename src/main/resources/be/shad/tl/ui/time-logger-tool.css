@@ -10,3 +10,7 @@
 .locked-task .label {
     -fx-text-fill: white;
 }
+.table-cell-text-field {
+    -fx-padding: -1;
+    -fx-background-color: -fx-focus-color, -fx-text-box-border, -fx-control-inner-background;
+}

@@ -60,7 +60,7 @@ public class TextFieldCellFactory<T, S, C extends StringConverter<S>> implements
             this.converter.addListener(new WeakInvalidationListener(converterListener));
             this.textField = new TextField();
             // padding to 0 so the 'graphics' and 'text' are equal in size
-            this.textField.setStyle("-fx-padding: 0;");
+            this.textField.getStyleClass().add("table-cell-text-field");
             this.setGraphic(this.textField);
 
             hoverProperty().addListener((property, oldValue, newValue) -> updateContentDisplay());
