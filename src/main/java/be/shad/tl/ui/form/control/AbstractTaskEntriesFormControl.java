@@ -74,6 +74,7 @@ public abstract class AbstractTaskEntriesFormControl extends AbstractFormControl
         row.setEntryId(entry.getId());
         row.setStartDate(entry.getStartDate());
         row.setEndDate(entry.getEndDate());
+        row.setRemark(entry.getRemark());
         if (entry.getEndDate() != null) {
             row.setDuration(entry.getEndDate().getTime() - entry.getStartDate().getTime());
         }
