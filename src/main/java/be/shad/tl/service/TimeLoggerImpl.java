@@ -55,6 +55,7 @@ public class TimeLoggerImpl implements TimeLogger {
     public void addTagToTask(String taskId, String tagId) {
         TimeLoggerTag taskTag = getOrCreateTag(tagId);
         data.addTag(data.getTask(taskId), taskTag);
+        persistence.addTagToTask(taskId, tagId);
     }
 
     private TimeLoggerTag getOrCreateTag(String tagId) {
