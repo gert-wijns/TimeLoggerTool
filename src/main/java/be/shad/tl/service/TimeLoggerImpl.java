@@ -72,6 +72,7 @@ public class TimeLoggerImpl implements TimeLogger {
         TimeLoggerTag taskTag = data.getTaskTag(tagId);
         if (taskTag != null) {
             data.removeTag(data.getTask(taskId), taskTag);
+            persistence.removeTagFromTask(taskId, tagId);
         }
     }
 

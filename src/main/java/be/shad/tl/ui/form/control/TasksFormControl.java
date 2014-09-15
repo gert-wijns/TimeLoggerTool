@@ -14,12 +14,8 @@ import javafx.animation.Timeline;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
@@ -51,7 +47,7 @@ public class TasksFormControl extends AbstractFormControl {
     @Override
     protected void initalizeControl() {
         taskMap = new HashMap<>();
-        taskList.setCellFactory(value -> new TaskListCell());
+        taskList.setCellFactory(value -> new TaskListCell(controller));
         taskList.setItems(observableArrayList(task -> new Observable[] {
                 task.nameProperty(), task.durationProperty(),
                 task.lockedProperty() }));
@@ -167,33 +163,12 @@ public class TasksFormControl extends AbstractFormControl {
 
     @FXML
     private void handleOnTaskListClick(MouseEvent event) {
-        TimeLoggerViewTask selectedItem = taskList.getSelectionModel().getSelectedItem();
         if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
+            TimeLoggerViewTask selectedItem = taskList.getSelectionModel().getSelectedItem();
             if (!selectedItem.isLocked()) {
                 controller.changeActivateTask(selectedItem.getId());
             }
-        } else if (event.getClickCount() == 1 && event.getButton() == MouseButton.SECONDARY) {
-            if (!selectedItem.isActive()) {
-                showPopupMenu(event, selectedItem);
-            }
         }
-    }
-
-    private void showPopupMenu(MouseEvent event, TimeLoggerViewTask selectedItem) {
-        final ContextMenu contextMenu = new ContextMenu();
-        MenuItem lockMenuItem = new MenuItem(selectedItem.isLocked() ? "Unlock": "Lock");
-        lockMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent e) {
-                if (selectedItem.isLocked()) {
-                    controller.removeTag(selectedItem.getId(), LOCKED_TAG);
-                } else {
-                    controller.addTag(selectedItem.getId(), LOCKED_TAG);
-                }
-                contextMenu.hide();
-            }
-        });
-        contextMenu.getItems().add(lockMenuItem);
-        contextMenu.show(event.getPickResult().getIntersectedNode(), event.getScreenX(), event.getScreenY());
     }
 
     private void handleOnTaskCreation(String name) {
