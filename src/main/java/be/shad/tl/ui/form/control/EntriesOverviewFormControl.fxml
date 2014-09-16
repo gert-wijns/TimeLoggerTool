@@ -10,16 +10,14 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import be.shad.tl.ui.factories.*?>
 
-<VBox prefHeight="440.0" prefWidth="302.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-    xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.shad.tl.ui.form.control.EntriesOverviewFormControl">
+<VBox prefHeight="440.0" prefWidth="302.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="be.shad.tl.ui.form.control.EntriesOverviewFormControl">
     <children>
         <ToolBar prefHeight="40.0" prefWidth="200.0">
             <items>
+                <Button mnemonicParsing="false" onAction="#showChangeTask" text="Change task" />
+                <Button mnemonicParsing="false" onAction="#addToPrevious" text="Add to previous" />
                 <Button mnemonicParsing="false" onAction="#handleSnapToPervious" text="Snap to previous" />
                 <Button mnemonicParsing="false" onAction="#handleSnapToNext" text="Snap to next" />
-                <Button mnemonicParsing="false" onAction="#handleSnapTo5m" text="Snap to 5m" />
-                <Button mnemonicParsing="false" onAction="#showAddBefore" text="Add before" />
-                <Button mnemonicParsing="false" onAction="#showAddAfter" text="Add after" />
             </items>
         </ToolBar>
         <TableView fx:id="entriesTable" prefHeight="5000.0">

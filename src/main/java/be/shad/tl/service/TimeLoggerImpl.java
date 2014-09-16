@@ -24,8 +24,10 @@ public class TimeLoggerImpl implements TimeLogger {
     }
 
     @Override
-    public void startTask(String taskId, Date startDate) {
-        startTask(taskId, UUID.randomUUID().toString(), startDate);
+    public String startTask(String taskId, Date startDate) {
+        String entryId = UUID.randomUUID().toString();
+        startTask(taskId, entryId, startDate);
+        return entryId;
     }
 
     @Override
@@ -138,6 +140,19 @@ public class TimeLoggerImpl implements TimeLogger {
     public void removeEntry(String entryId) {
         data.removeEntry(data.getTaskEntry(entryId));
         persistence.removeEntry(entryId);
+    }
+
+    @Override
+    public void changeTask(String entryId, String taskId) {
+        TimeLoggerEntry taskEntry = data.getTaskEntry(entryId);
+        removeEntry(entryId);
+        String newEntryId = startTask(taskId, taskEntry.getStartDate());
+        if (taskEntry.getEndDate() != null) {
+            stopTaskEntry(newEntryId, taskEntry.getEndDate());
+        }
+        if (taskEntry.getRemark() != null) {
+            setEntryRemark(newEntryId, taskEntry.getRemark());
+        }
     }
 
     @Override

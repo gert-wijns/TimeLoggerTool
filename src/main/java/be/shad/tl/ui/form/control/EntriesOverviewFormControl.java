@@ -6,6 +6,10 @@ import java.util.List;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.control.TableView.TableViewSelectionModel;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import be.shad.tl.service.model.TimeLoggerTask;
 import be.shad.tl.ui.model.TimeLoggerViewEntry;
 import be.shad.tl.ui.model.event.TaskStartedEvent;
@@ -64,16 +68,30 @@ public class EntriesOverviewFormControl extends AbstractTaskEntriesFormControl {
     }
 
     @FXML
-    private void handleSnapTo5m() {
+    private void addToPrevious() {
+        TableViewSelectionModel<TimeLoggerViewEntry> tableViewSelectionModel =
+                entriesTable.selectionModelProperty().get();
+        if (tableViewSelectionModel.getSelectedIndex() > 0) {
+            TimeLoggerViewEntry previous = entriesTable.getItems().get(tableViewSelectionModel.getSelectedIndex()-1);
+            TimeLoggerViewEntry selectedItem = tableViewSelectionModel.getSelectedItem();
+            controller.removeEntry(selectedItem.getEntryId());
+            controller.setEntryEndDate(previous.getEntryId(), selectedItem.getEndDate());
+        }
+
     }
 
     @FXML
-    private void showAddBefore() {
-
-    }
-
-    @FXML
-    private void showAddAfter() {
-
+    private void showChangeTask() {
+        TimeLoggerViewEntry selectedItem = entriesTable.selectionModelProperty().get().getSelectedItem();
+        if (selectedItem != null) {
+            Stage dialog = new Stage();
+            dialog.initStyle(StageStyle.UTILITY);
+            dialog.setTitle("Change task");
+            dialog.setScene(new Scene(view.loadTaskChangeFormControl((control) -> {
+                ((TaskChangeFormControl) control).setTaskLogEntry(selectedItem);
+                ((TaskChangeFormControl) control).setDialog(dialog);
+            })));
+            dialog.showAndWait();
+        }
     }
 }

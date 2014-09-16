@@ -4,7 +4,7 @@ import java.util.Date;
 
 public interface TimeLogger {
 
-    void startTask(String taskId, Date startDate);
+    String startTask(String taskId, Date startDate);
 
     void stopTask(String taskId);
 
@@ -42,4 +42,6 @@ public interface TimeLogger {
     void removeTagFromTask(String taskId, String tagId);
 
     String getEntriesAsCsvString();
+
+    void changeTask(String entryId, String taskId);
 }

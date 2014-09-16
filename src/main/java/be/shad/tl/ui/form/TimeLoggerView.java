@@ -1,6 +1,7 @@
 package be.shad.tl.ui.form;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -55,20 +56,29 @@ public class TimeLoggerView {
         return load(AnchorPane.class, "SettingsFormControl");
     }
 
-    @SuppressWarnings("unchecked")
+    public AnchorPane loadTaskChangeFormControl(Consumer<AbstractFormControl> controlInitializer) {
+        return load(AnchorPane.class, "TaskChangeFormControl", controlInitializer);
+    }
+
     private <N extends Node> N load(Class<N> nodeType, String name) {
+        return load(nodeType, name, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <N extends Node> N load(Class<N> nodeType, String name, Consumer<AbstractFormControl> controlInitializer) {
         String resource = "/be/shad/tl/ui/form/control/" + name + ".fxml";
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(TimeLoggerView.class.getResource(resource));
-            loader.setControllerFactory((p) -> createController(p));
+            loader.setControllerFactory((p) -> createController(p, controlInitializer));
             return (N) loader.load();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Object createController(Class<?> controllerClass) {
+    private Object createController(Class<?> controllerClass,
+            Consumer<AbstractFormControl> controlInitializer) {
         try {
             Object controllerObj = controllerClass.newInstance();
             if (controllerObj instanceof AbstractFormControl) {
@@ -76,6 +86,9 @@ public class TimeLoggerView {
                 control.setController(controller);
                 control.setModel(model);
                 control.setView(this);
+                if (controlInitializer != null) {
+                    controlInitializer.accept(control);
+                }
             }
             return controllerObj;
         } catch (Exception e) {

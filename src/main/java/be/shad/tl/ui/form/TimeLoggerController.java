@@ -140,4 +140,19 @@ public class TimeLoggerController {
     public String getEntriesAsCsvString() {
         return timeLogger.getEntriesAsCsvString();
     }
+
+    public void removeEntry(String entryId) {
+        timeLogger.removeEntry(entryId);
+        dispatchEvent(new EntryChangedEvent(entryId));
+    }
+
+    public void changeTask(String entryId, String taskId) {
+        TimeLoggerEntry taskEntry = timeLoggerData.getTaskEntry(entryId);
+        timeLogger.changeTask(entryId, taskId);
+        if (taskEntry.getEndDate() != null) {
+            dispatchEvent(new TaskStoppedEvent(taskId));
+        } else {
+            dispatchEvent(new TaskStartedEvent(taskId));
+        }
+    }
 }
