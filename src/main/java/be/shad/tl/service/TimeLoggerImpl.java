@@ -169,7 +169,7 @@ public class TimeLoggerImpl implements TimeLogger {
     @Override
     public void setEntryEndDate(String entryId, Date endDate) {
         TimeLoggerEntry taskEntry = data.getTaskEntry(entryId);
-        if (taskEntry.getStartDate().after(endDate)) {
+        if (endDate != null && taskEntry.getStartDate().after(endDate)) {
             taskEntry.setStartDate(endDate);
             persistence.setEntryStartDate(entryId, endDate);
         }

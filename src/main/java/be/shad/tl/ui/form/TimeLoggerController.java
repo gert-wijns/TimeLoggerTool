@@ -96,7 +96,11 @@ public class TimeLoggerController {
                 }
             }
             timeLogger.setEntryEndDate(entryId, endDate);
-            dispatchEvent(new EntryChangedEvent(entryId));
+            if (endDate == null) {
+                dispatchEvent(new TaskStartedEvent(taskEntry.getTaskId()));
+            } else {
+                dispatchEvent(new EntryChangedEvent(entryId));
+            }
         }
     }
 
